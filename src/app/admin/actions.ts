@@ -114,7 +114,19 @@ export async function saveVehicle(_prev: FormState, formData: FormData): Promise
   if (!vehicle.swatches.length) vehicle.swatches = ["#8AD6FF", "#C8D3DE", "#1F2A36", "#7E6A55"];
   if (!vehicle.photos?.length) delete vehicle.photos;
 
-  await putVehicle(vehicle);
+  /**
+   * L'écriture peut échouer pour une raison qui n'est pas la faute de
+   * l'utilisateur : disque en lecture seule sur un hébergement serverless.
+   * Sans ce filet, l'action lève, Next renvoie un 500 et le concessionnaire
+   * ne voit qu'une page noire « A server error occurred » — impossible à
+   * interpréter. On rend le message tel quel dans le formulaire.
+   */
+  try {
+    await putVehicle(vehicle);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Enregistrement impossible." };
+  }
+
   refreshPublicPages(slug);
   redirect(`/admin?enregistre=${encodeURIComponent(slug)}`);
 }
@@ -192,18 +204,25 @@ export async function uploadPhoto(_prev: FormState, formData: FormData): Promise
   if (file.size > MAX_BYTES) return { error: "Fichier trop lourd (8 Mo maximum)." };
 
   const dir = path.join(process.cwd(), "public", "vehicules", slug);
-  await fs.mkdir(dir, { recursive: true });
-
   const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : file.type === "image/avif" ? "avif" : "jpg";
   const name = `${Date.now().toString(36)}.${ext}`;
-  await fs.writeFile(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
-
   const publicPath = `/vehicules/${slug}/${name}`;
-  const v = await getVehicle(slug);
-  if (v) {
-    await putVehicle({ ...v, photos: [...(v.photos ?? []), publicPath] });
-    refreshPublicPages(slug);
+
+  try {
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
+    const v = await getVehicle(slug);
+    if (v) await putVehicle({ ...v, photos: [...(v.photos ?? []), publicPath] });
+  } catch {
+    return {
+      error:
+        "Téléversement impossible : le système de fichiers est en lecture seule. " +
+        "C'est le cas sur Vercel et Netlify. Déployez sur un hébergement Node persistant " +
+        "(Render, Railway, VPS) pour que le back-office puisse écrire.",
+    };
   }
+
+  refreshPublicPages(slug);
   return { ok: publicPath };
 }
 

@@ -171,12 +171,28 @@ export function VehicleForm({ vehicle }: { vehicle?: Vehicle }) {
       </form>
 
       <aside className="grid gap-4 lg:sticky lg:top-24">
+        {/* L'aperçu doit montrer ce que le visiteur verra : la photo de
+            couverture dès qu'il y en a une, la silhouette sinon. Il affichait
+            toujours la silhouette, ce qui laissait croire que les photos
+            n'étaient pas prises en compte. */}
         <div className="card overflow-hidden hover:!translate-y-0 hover:!shadow-[var(--sh-s)]">
-          <div className="stage aspect-[16/10] grid place-items-center p-4">
-            <Silhouette body={body} className="w-full relative z-[2]" />
+          <div className="stage relative aspect-[16/10] grid place-items-center p-4">
+            {vehicle?.photos?.length ? (
+              <Image
+                src={vehicle.photos[0]}
+                alt={`Couverture de ${vehicle.brand} ${vehicle.model}`}
+                fill
+                sizes="360px"
+                className="object-cover z-[2]"
+              />
+            ) : (
+              <Silhouette body={body} className="w-full relative z-[2]" />
+            )}
           </div>
           <p className="p-4 text-[12px]" style={{ color: "var(--ink-3)" }}>
-            Aperçu de la silhouette. Elle s&apos;affiche tant qu&apos;aucune photo n&apos;est ajoutée.
+            {vehicle?.photos?.length
+              ? `Photo de couverture — la première des ${vehicle.photos.length}. Réordonnez ci-dessous pour la changer.`
+              : "Aperçu de la silhouette. Elle s'affiche tant qu'aucune photo n'est ajoutée."}
           </p>
         </div>
 

@@ -23,17 +23,34 @@ async function read(): Promise<Vehicle[]> {
   try {
     return JSON.parse(await fs.readFile(FILE, "utf8")) as Vehicle[];
   } catch {
-    await write(seedVehicles);
+    // Premier démarrage : on sème le parc initial. Si le disque refuse
+    // l'écriture (hébergement serverless), on sert quand même le contenu en
+    // mémoire — mieux vaut un site en lecture seule qu'une erreur 500.
+    try {
+      await write(seedVehicles);
+    } catch {
+      /* lecture seule : on continue avec le parc de départ */
+    }
     return seedVehicles;
   }
 }
 
 async function write(list: Vehicle[]) {
-  await fs.mkdir(path.dirname(FILE), { recursive: true });
-  // écriture atomique : on écrit à côté puis on renomme — jamais de fichier tronqué
-  const tmp = `${FILE}.${process.pid}.tmp`;
-  await fs.writeFile(tmp, JSON.stringify(list, null, 2), "utf8");
-  await fs.rename(tmp, FILE);
+  try {
+    await fs.mkdir(path.dirname(FILE), { recursive: true });
+    // écriture atomique : on écrit à côté puis on renomme — jamais de fichier tronqué
+    const tmp = `${FILE}.${process.pid}.tmp`;
+    await fs.writeFile(tmp, JSON.stringify(list, null, 2), "utf8");
+    await fs.rename(tmp, FILE);
+  } catch (cause) {
+    throw new Error(
+      "Impossible d'écrire data/vehicles.json. Le système de fichiers est en " +
+        "lecture seule — c'est le cas sur Vercel et Netlify Functions. Déployez " +
+        "sur un hébergement Node persistant, ou remplacez les fonctions de " +
+        "src/lib/store.ts par des requêtes vers une base. Voir le README.",
+      { cause },
+    );
+  }
 }
 
 export async function getVehicles(): Promise<Vehicle[]> {

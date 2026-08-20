@@ -253,8 +253,11 @@ export function VehicleSheetProvider({ children }: { children: ReactNode }) {
                     jour même.
                   </div>
 
+                  {/* La navigation est côté client : sans ce `close`, le panneau
+                      resterait ouvert par-dessus la fiche qui vient de s'afficher. */}
                   <Link
                     href={`/vehicules/${vehicle.slug}`}
+                    onClick={close}
                     className="inline-flex items-center gap-2 text-[13px] font-medium mb-8"
                     style={{ color: "var(--brand)" }}
                   >

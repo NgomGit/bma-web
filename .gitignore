@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+.env*.local
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts
+
+# contenu géré par le back-office — à sauvegarder, pas à versionner
+/data/*.json

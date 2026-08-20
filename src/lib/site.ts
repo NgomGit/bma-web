@@ -51,7 +51,7 @@ export const waVehicle = (brand: string, model: string, year: number) =>
   wa(`Bonjour Baye Mor, je suis intéressé par la ${brand} ${model} (${year}) vue sur le site BMA. Est-elle toujours disponible ?`);
 
 export const nav = [
-  { href: "/vehicules", label: "Véhicules", index: "01" },
+  { href: "/vehicules", label: "Nos voitures", index: "01" },
   { href: "/import-voiture-dakar", label: "Import", index: "02" },
   { href: "/#contact", label: "Contact", index: "03" },
 ] as const;

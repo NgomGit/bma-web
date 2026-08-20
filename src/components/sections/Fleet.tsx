@@ -1,16 +1,28 @@
 "use client";
 
 import { AnimatePresence, LayoutGroup } from "framer-motion";
-import { useState } from "react";
+import { useDeferredValue, useState } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { VehicleCard } from "@/components/vehicle/VehicleCard";
+import { NoVehicleFound, SearchField, useVehicleSearch } from "@/components/vehicle/searchKit";
 import { Arrow } from "@/components/ui/icons";
 import { countFor, filters, matches, type FilterKey, type Vehicle } from "@/data/vehicles";
 
-/** Le parc complet, avec filtres par carrosserie */
+/**
+ * Le parc complet : recherche libre, puis filtres par carrosserie.
+ *
+ * La recherche est ici et pas seulement sur la page catalogue : c'est l'accueil
+ * que la plupart des visiteurs voient en premier, et quelqu'un qui cherche une
+ * marque précise ne devrait pas avoir à changer de page pour la taper.
+ */
 export function Fleet({ vehicles }: { vehicles: Vehicle[] }) {
   const [key, setKey] = useState<FilterKey>("tous");
-  const list = vehicles.filter((v) => matches(v, key));
+  const [query, setQuery] = useState("");
+  const deferred = useDeferredValue(query);
+
+  const found = useVehicleSearch(vehicles, deferred);
+  const list = found.filter((v) => matches(v, key));
+  const searching = deferred.trim().length > 0;
 
   return (
     <section className="section pt-0" id="parc">
@@ -24,11 +36,18 @@ export function Fleet({ vehicles }: { vehicles: Vehicle[] }) {
           </p>
         </Reveal>
 
+        <Reveal className="mb-5">
+          <SearchField value={query} onChange={setQuery} />
+        </Reveal>
+
         <div
           className="flex gap-2 overflow-x-auto no-bar md:flex-wrap mb-6"
           style={{ margin: "0 calc(var(--pad) * -1) 24px", padding: "2px var(--pad) 14px" }}
         >
-          {filters.map((f) => {
+          {/* une catégorie vide n'est pas un filtre, c'est une impasse : on la masque */}
+          {filters
+            .filter((f) => f.key === "tous" || countFor(found, f.key) > 0)
+            .map((f) => {
             const on = key === f.key;
             return (
               <button
@@ -45,7 +64,7 @@ export function Fleet({ vehicles }: { vehicles: Vehicle[] }) {
                 }}
               >
                 {f.label}
-                <em className="not-italic ml-1.5 text-[11px] opacity-60 tnum">{countFor(vehicles, f.key)}</em>
+                <em className="not-italic ml-1.5 text-[11px] opacity-60 tnum">{countFor(found, f.key)}</em>
               </button>
             );
           })}
@@ -61,14 +80,18 @@ export function Fleet({ vehicles }: { vehicles: Vehicle[] }) {
           </div>
         </LayoutGroup>
 
-        <Reveal className="mt-9 flex flex-wrap gap-3 items-center">
-          <p className="lead flex-1 min-w-[260px]">
-            Le modèle que vous cherchez n&apos;est pas là ? Nous allons le chercher.
-          </p>
-          <a href="#import" className="btn btn--ghost">
-            Demander un import <Arrow />
-          </a>
-        </Reveal>
+        {searching && list.length === 0 && <NoVehicleFound query={query.trim()} />}
+
+        {!searching && (
+          <Reveal className="mt-9 flex flex-wrap gap-3 items-center">
+            <p className="lead flex-1 min-w-[260px]">
+              Le modèle que vous cherchez n&apos;est pas là ? Nous allons le chercher.
+            </p>
+            <a href="#import" className="btn btn--ghost">
+              Demander un import <Arrow />
+            </a>
+          </Reveal>
+        )}
       </div>
     </section>
   );

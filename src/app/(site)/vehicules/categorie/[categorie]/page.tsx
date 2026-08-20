@@ -23,7 +23,12 @@ async function load(categorie: string) {
   const body = BODY_FROM_SLUG[categorie];
   if (!body) return null;
   const all = await getVehicles();
-  return { all, body, label: BODY_PLURAL[body], vehicles: all.filter((v) => v.body === body) };
+  const vehicles = all.filter((v) => v.body === body);
+  // une catégorie sans voiture n'est pas une page : c'est une impasse pour le
+  // visiteur et du contenu vide pour Google. `bodiesOf` ne la génère déjà plus,
+  // mais l'URL reste atteignable — on renvoie donc un 404 franc.
+  if (!vehicles.length) return null;
+  return { all, body, label: BODY_PLURAL[body], vehicles };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ categorie: string }> }): Promise<Metadata> {

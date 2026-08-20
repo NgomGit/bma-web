@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
-import { JsonLd, breadcrumbLd, dealerLd, faqLd, graph, meta } from "@/lib/seo";
+import { JsonLd, breadcrumbLd, dealerLd, graph, meta } from "@/lib/seo";
 import { Phone, WhatsApp } from "@/components/ui/icons";
 import { site, waImport } from "@/lib/site";
 
@@ -36,6 +36,8 @@ const STEPS = [
   { n: 4, t: "Livraison à Dakar, clés en main", d: "Nous gérons le fret maritime, le dédouanement au Port de Dakar, le quitus fiscal et l'immatriculation. Vous récupérez le véhicule prêt à rouler, dossier complet à votre nom." },
 ];
 
+/** Conservé pour la réactivation du bloc ci-dessous. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const FAQ = [
   { q: "Combien de temps prend l'importation d'une voiture au Sénégal ?",
     a: "Comptez en moyenne 45 jours entre la validation de votre commande et la remise des clés à Dakar, dédouanement inclus. Le délai varie de 40 jours depuis Dubaï à 60 jours depuis l'Europe selon les rotations maritimes et le modèle recherché." },
@@ -63,7 +65,7 @@ export default function ImportPage() {
         data={graph(
           dealerLd(),
           breadcrumbLd(trail),
-          faqLd(FAQ),
+          // faqLd(FAQ),  ← à remettre avec le bloc visible
           {
             "@type": "Service",
             "@id": `${site.url}/import-voiture-dakar#service`,
@@ -115,6 +117,11 @@ export default function ImportPage() {
           ))}
         </ol>
 
+        {/* Questions fréquentes — mises de côté à la demande de BMA.
+            Pour les remettre : décommenter ce bloc ET `faqLd(FAQ)` dans le JsonLd
+            ci-dessus. Les deux vont ensemble : Google sanctionne un balisage FAQ
+            sans questions visibles sur la page.
+
         <h2 className="text-[24px] tracking-[-.035em] mb-6">Questions fréquentes sur l&apos;import</h2>
         <div className="grid gap-3 mb-12">
           {FAQ.map((f) => (
@@ -124,6 +131,7 @@ export default function ImportPage() {
             </details>
           ))}
         </div>
+        */}
 
         <div className="card p-7 hover:!translate-y-0">
           <h2 className="text-[21px] tracking-[-.03em] mb-3">Décrivez-nous le véhicule que vous cherchez</h2>

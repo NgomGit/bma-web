@@ -15,7 +15,7 @@ import { site, waImport } from "@/lib/site";
 
 const TITLE = "Importer une voiture au Sénégal | BMA Dakar";
 const DESC =
-  "BMA importe à Dakar le véhicule exact que vous cherchez : recherche à l'étranger, rapport d'inspection avant achat, transport, dédouanement et immatriculation. Délai moyen 45 jours, à partir de 10 000 000 FCFA.";
+  "BMA importe à Dakar le véhicule exact que vous cherchez : recherche à l'étranger, rapport d'inspection avant achat, transport, dédouanement et immatriculation. Délai moyen 45 jours.";
 
 export const metadata: Metadata = meta({
   title: TITLE,
@@ -48,7 +48,7 @@ const FAQ = [
   { q: "Que se passe-t-il si le véhicule ne correspond pas à l'annonce ?",
     a: "C'est précisément pourquoi nous faisons inspecter chaque véhicule avant achat et pourquoi nous engageons notre nom sur chaque dossier. En cas d'écart constaté à la livraison, nous en assumons la responsabilité." },
   { q: "Quel budget prévoir pour importer un véhicule à Dakar ?",
-    a: "Nos dossiers d'import commencent à 10 000 000 FCFA tout compris, dédouanement et immatriculation inclus. En dessous, la qualité du véhicule ne justifie généralement pas les frais fixes de l'opération." },
+    a: "Le budget se définit ensemble selon le modèle recherché : nous vous annonçons le coût complet, dédouanement et immatriculation inclus, avant tout engagement." },
 ];
 
 export default function ImportPage() {
@@ -95,8 +95,7 @@ export default function ImportPage() {
           achat, fret, dédouanement au Port de Dakar et immatriculation compris.
         </p>
         <p className="lead mb-10">
-          Délai moyen de <strong style={{ color: "var(--ink)", fontWeight: 500 }}>45 jours</strong>, dossiers
-          à partir de <strong style={{ color: "var(--ink)", fontWeight: 500 }}>10 000 000 FCFA</strong> tout
+          Délai moyen de <strong style={{ color: "var(--ink)", fontWeight: 500 }}>45 jours</strong>, tout
           compris. Un seul interlocuteur du premier appel à la remise des clés.
         </p>
 

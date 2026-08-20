@@ -8,19 +8,32 @@ export const site = {
   tagline: "Concessionnaire à Dakar",
   url: "https://bma-automobile.sn",
 
-  // ⚠️ numéro fictif — remplacer par le vrai
-  phone: "+221770000000",
-  phoneDisplay: "+221 77 000 00 00",
-  whatsapp: "221770000000",
+  // repris de la fiche Google Business vérifiée de l'établissement
+  phone: "+221710748281",
+  phoneDisplay: "+221 71 074 82 81",
+  whatsapp: "221710748281",
 
   address: {
-    street: "Adresse exacte à compléter",
+    street: "En face de l'entrée du péage, croisement Cambérène",
     city: "Dakar",
     country: "SN",
     countryName: "Sénégal",
   },
   hours: "Lun – Sam · 8h30 – 19h30",
   hoursNote: "Dimanche sur rendez-vous",
+
+  /**
+   * Lien de partage de la fiche Google, et itinéraire.
+   * L'itinéraire passe par l'API d'URL universelle de Google Maps : elle ouvre
+   * l'application native sur téléphone et le site sur ordinateur, sans clé.
+   */
+  maps: "https://share.google/qFS5gwiI0GvzN9yxx",
+  directions:
+    "https://www.google.com/maps/dir/?api=1&destination=" +
+    encodeURIComponent("Baye Mor Automobile BMA, croisement Cambérène, Dakar"),
+
+  /** Note publique de la fiche Google — à réactualiser quand elle bouge */
+  rating: { score: "5,0", count: 3 },
 } as const;
 
 export const wa = (message: string) =>
@@ -40,7 +53,5 @@ export const waVehicle = (brand: string, model: string, year: number) =>
 export const nav = [
   { href: "/vehicules", label: "Véhicules", index: "01" },
   { href: "/import-voiture-dakar", label: "Import", index: "02" },
-  { href: "/#garanties", label: "Garanties", index: "03" },
-  { href: "/#avis", label: "Avis", index: "04" },
-  { href: "/#contact", label: "Contact", index: "05" },
+  { href: "/#contact", label: "Contact", index: "03" },
 ] as const;

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Silhouette } from "@/components/vehicle/VehicleVisual";
 import { QuickView } from "@/components/vehicle/QuickView";
 import { Arrow } from "@/components/ui/icons";
-import type { Vehicle } from "@/data/vehicles";
+import { formatPrice, type Vehicle } from "@/data/vehicles";
 
 /**
  * Grille de véhicules rendue côté serveur.
@@ -29,13 +29,9 @@ export function VehicleGrid({ vehicles }: { vehicles: Vehicle[] }) {
             <span className="scanline" />
             <span
               className="absolute top-3 left-3 z-[3] px-2.5 py-1.5 rounded-full text-[10px] font-medium backdrop-blur-md border"
-              style={
-                v.status === "commande"
-                  ? { background: "rgba(4,18,34,.62)", color: "#8AD6FF", borderColor: "rgba(138,214,255,.45)" }
-                  : { background: "rgba(5,24,16,.62)", color: "#5BE49B", borderColor: "rgba(91,228,155,.45)" }
-              }
+              style={{ background: "rgba(5,24,16,.62)", color: "#5BE49B", borderColor: "rgba(91,228,155,.45)" }}
             >
-              {v.status === "commande" ? "Sur commande" : "Disponible"}
+              Disponible
             </span>
             <span
               className="absolute top-3 right-3 z-[3] px-2.5 py-1.5 rounded-full text-[10.5px] font-medium tnum backdrop-blur-md border"
@@ -77,10 +73,18 @@ export function VehicleGrid({ vehicles }: { vehicles: Vehicle[] }) {
 
             <div className="mt-auto flex items-center justify-between gap-2.5 pt-3.5 border-t" style={{ borderColor: "var(--line)" }}>
               <span>
-                <b className="block text-[13px] font-medium">Prix sur demande</b>
-                <small className="block text-[11px]" style={{ color: "var(--ink-3)" }}>
-                  À partir de 10 millions FCFA
-                </small>
+                {v.price ? (
+                  <b className="block text-[15px] font-medium tnum" style={{ color: "var(--brand)" }}>
+                    {formatPrice(v.price)}
+                  </b>
+                ) : (
+                  <>
+                    <b className="block text-[13px] font-medium">Prix sur demande</b>
+                    <small className="block text-[11px]" style={{ color: "var(--ink-3)" }}>
+                      Communiqué par téléphone
+                    </small>
+                  </>
+                )}
               </span>
               <span
                 className="w-10 h-10 rounded-full border grid place-items-center shrink-0 transition-all duration-400

@@ -1,5 +1,4 @@
 export type BodyType = "suv" | "pickup" | "berline" | "crossover";
-export type Availability = "disponible" | "commande";
 
 export interface Vehicle {
   slug: string;
@@ -16,10 +15,9 @@ export interface Vehicle {
   color: string;
   drivetrain: string;
   bodywork: string;
-  status: Availability;
   origin: string;
-  /** délai indicatif — uniquement pour les véhicules sur commande */
-  lead?: string;
+  /** Prix en FCFA. Absent = « Prix sur demande » partout. */
+  price?: number;
   /** teintes proposées, appliquées au tracé du véhicule */
   swatches: string[];
   /** commentaire de la maison, affiché dans l'onglet « Le mot de BMA » */
@@ -55,8 +53,8 @@ export const seedVehicles: Vehicle[] = [
     model: "GLE AMG Line",
     body: "suv",
     year: 2021,
-    mileage: "Sur demande",
-    gearbox: "Automatique 9G-TRONIC",
+    mileage: "62 000 km",
+    gearbox: "Automatique",
     fuel: "Diesel",
     seats: 5,
     engine: "Diesel 4MATIC",
@@ -64,12 +62,11 @@ export const seedVehicles: Vehicle[] = [
     color: "Vert émeraude métallisé",
     drivetrain: "4MATIC intégrale",
     bodywork: "SUV 5 portes",
-    status: "disponible",
     origin: "Importé de Belgique",
     featured: true,
     swatches: ["#12291F", "#0B1712", "#C9B693", "#6E7A72"],
     note:
-      "Celui-là ne ressemble à aucun autre GLE : le vert émeraude métallisé se commande à la carte et on n'en croise pas deux à Dakar. Pack AMG Line complet, cuir beige macchiato, boiseries claires, éclairage d'ambiance et toit panoramique. C'est la voiture d'un client qui veut être vu sans en faire trop — un GLE ne crie pas, il s'impose.",
+      "Celui-là ne ressemble à aucun autre GLE : le vert émeraude métallisé est une teinte rare, et on n'en croise pas deux à Dakar. Pack AMG Line complet, cuir beige macchiato, boiseries claires, éclairage d'ambiance et toit panoramique. C'est la voiture d'un client qui veut être vu sans en faire trop — un GLE ne crie pas, il s'impose.",
     equipment: [
       "Pack extérieur AMG Line, calandre diamant",
       "Jantes AMG multibranches, étriers apparents",
@@ -99,8 +96,8 @@ export const seedVehicles: Vehicle[] = [
     model: "X4 M40i",
     body: "crossover",
     year: 2019,
-    mileage: "Sur demande",
-    gearbox: "Automatique 8 rapports",
+    mileage: "78 000 km",
+    gearbox: "Automatique",
     fuel: "Essence",
     seats: 5,
     engine: "3.0 six cylindres en ligne biturbo",
@@ -108,7 +105,6 @@ export const seedVehicles: Vehicle[] = [
     color: "Bleu Phytonic métallisé",
     drivetrain: "xDrive intégrale",
     bodywork: "SUV coupé 5 portes",
-    status: "disponible",
     origin: "Importé de Belgique",
     featured: true,
     swatches: ["#1E3A5F", "#0B1420", "#C8D3DE", "#7B8794"],
@@ -143,8 +139,8 @@ export const seedVehicles: Vehicle[] = [
     model: "Ranger Raptor",
     body: "pickup",
     year: 2021,
-    mileage: "Sur demande",
-    gearbox: "Automatique 10 rapports",
+    mileage: "55 000 km",
+    gearbox: "Automatique",
     fuel: "Diesel",
     seats: 5,
     engine: "2.0 EcoBlue bi-turbo",
@@ -152,7 +148,6 @@ export const seedVehicles: Vehicle[] = [
     color: "Gris Conquer",
     drivetrain: "4×4 enclenchable",
     bodywork: "Pick-up double cabine",
-    status: "disponible",
     origin: "Importé d'Europe",
     featured: true,
     swatches: ["#8B9296", "#3A3F44", "#12161A", "#C4C9CC"],
@@ -187,8 +182,8 @@ export const seedVehicles: Vehicle[] = [
     model: "Range Rover Sport",
     body: "suv",
     year: 2016,
-    mileage: "Sur demande",
-    gearbox: "Automatique 8 rapports",
+    mileage: "118 000 km",
+    gearbox: "Automatique",
     fuel: "Diesel",
     seats: 7,
     engine: "3.0 SDV6",
@@ -196,7 +191,6 @@ export const seedVehicles: Vehicle[] = [
     color: "Gris Corris métallisé",
     drivetrain: "4×4 permanent",
     bodywork: "SUV 5 portes",
-    status: "disponible",
     origin: "Importé d'Europe",
     featured: true,
     swatches: ["#5C6167", "#2B2F34", "#D2D7DC", "#8E959C"],
@@ -231,8 +225,8 @@ export const seedVehicles: Vehicle[] = [
     model: "Pajero Long",
     body: "suv",
     year: 2017,
-    mileage: "Sur demande",
-    gearbox: "Automatique 5 rapports",
+    mileage: "96 000 km",
+    gearbox: "Automatique",
     fuel: "Diesel",
     seats: 7,
     engine: "3.2 DI-D",
@@ -240,7 +234,6 @@ export const seedVehicles: Vehicle[] = [
     color: "Noir",
     drivetrain: "Super Select 4WD II",
     bodywork: "SUV 5 portes",
-    status: "disponible",
     origin: "Importé d'Europe",
     swatches: ["#0D0D0F", "#3A3D42", "#B9C0C7", "#6E7378"],
     note:
@@ -274,13 +267,12 @@ export const filters = [
   { key: "pickup", label: "Pick-up" },
   { key: "berline", label: "Berlines" },
   { key: "crossover", label: "Crossovers" },
-  { key: "commande", label: "Sur commande" },
 ] as const;
 
 export type FilterKey = (typeof filters)[number]["key"];
 
 export const matches = (v: Vehicle, key: FilterKey) =>
-  key === "tous" ? true : key === "commande" ? v.status === "commande" : v.body === key;
+  key === "tous" ? true : v.body === key;
 
 export const countFor = (list: Vehicle[], key: FilterKey) => list.filter((v) => matches(v, key)).length;
 
@@ -294,8 +286,6 @@ export const BODY_LABELS: Record<BodyType, string> = {
 /* ------------------------------------------------------------------ SEO ---- */
 
 /** Prix plancher du parc, en FCFA. Sert au positionnement et aux données structurées. */
-export const PRICE_FLOOR_XOF = 10_000_000;
-
 export const slugify = (s: string) =>
   s
     .toLowerCase()
@@ -342,3 +332,7 @@ export const bodiesOf = (list: Vehicle[]) =>
       count: list.filter((v) => v.body === body).length,
     }))
     .filter((b) => b.count > 0);
+
+/** « 28 500 000 FCFA » — espaces insécables fines, comme en typographie française */
+export const formatPrice = (xof: number) =>
+  `${new Intl.NumberFormat("fr-FR").format(xof).replace(/\u202f|\u00a0/g, " ")} FCFA`;

@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ marque: s
   const models = vehicles.map((v) => v.model).slice(0, 4).join(", ");
   return meta({
     title: `${brand.brand} d'occasion à Dakar — ${vehicles.length} véhicule${vehicles.length > 1 ? "s" : ""} | BMA`,
-    description: `${brand.brand} d'occasion vérifiées à Dakar, à partir de 10 000 000 FCFA : ${models}. Papiers en règle, essai avant achat, import sur commande. Prix sur demande chez BMA.`,
+    description: `${brand.brand} d'occasion vérifiées à Dakar : ${models}. Papiers en règle, essai avant achat, import sur commande. Prix sur demande chez BMA.`,
     path: `/vehicules/marque/${brand.slug}`,
     keywords: [
       `${brand.brand} Dakar`, `${brand.brand} occasion Sénégal`, `acheter ${brand.brand} Dakar`,
@@ -58,8 +58,7 @@ export default async function BrandPage({ params }: { params: Promise<{ marque: 
         <h1 className="h2 mt-4 mb-4">{title}</h1>
         <p className="lead mb-3">
           Les {brand.brand} disponibles chez BMA, toutes vérifiées avant mise en vente et vendues avec un
-          dossier administratif complet. Notre gamme démarre à{" "}
-          <strong style={{ color: "var(--ink)", fontWeight: 500 }}>10 000 000 FCFA</strong>.
+          dossier administratif complet.
         </p>
         <p className="lead mb-8">
           Nous privilégions les {brand.brand} au carnet d&apos;entretien suivi et au kilométrage

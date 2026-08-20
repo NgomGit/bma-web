@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { FacetNav } from "@/components/seo/FacetNav";
-import { VehicleGrid } from "@/components/seo/VehicleGrid";
+import { VehicleSearch } from "@/components/vehicle/VehicleSearch";
 import { JsonLd, breadcrumbLd, dealerLd, graph, itemListLd, meta } from "@/lib/seo";
 import { getVehicles } from "@/lib/store";
 import { site } from "@/lib/site";
 
-const TITLE = "Voitures d'occasion à Dakar — dès 10 millions FCFA | BMA";
+const TITLE = "Voitures d'occasion à Dakar | BMA";
 const DESC =
-  "Le parc BMA à Dakar : SUV, 4×4, pick-up et berlines d'occasion vérifiés, à partir de 10 000 000 FCFA. Papiers en règle, essai avant achat, import sur commande. Prix communiqué par téléphone.";
+  "Le parc BMA à Dakar : SUV, 4×4, pick-up et berlines d'occasion vérifiés. Papiers en règle, essai avant achat, import sur commande. Prix communiqué par téléphone.";
 
 export const metadata: Metadata = meta({
   title: TITLE,
@@ -18,7 +18,7 @@ export const metadata: Metadata = meta({
   keywords: [
     "voiture occasion Dakar", "voiture d'occasion Sénégal", "acheter voiture Dakar",
     "concessionnaire Dakar", "SUV occasion Dakar", "4x4 occasion Sénégal",
-    "pick-up Dakar", "voiture haut de gamme Dakar", "voiture 10 millions FCFA",
+    "pick-up Dakar", "voiture haut de gamme Dakar", "SUV de luxe Dakar",
   ],
 });
 
@@ -34,10 +34,8 @@ export default async function CataloguePage() {
         <span className="kicker">Catalogue · {vehicles.length} véhicules</span>
         <h1 className="h2 mt-4 mb-4">Voitures d&apos;occasion à Dakar</h1>
         <p className="lead mb-3">
-          Tout le parc de {site.legalName}, mis à jour en continu. Notre gamme commence à{" "}
-          <strong style={{ color: "var(--ink)", fontWeight: 500 }}>10 000 000 FCFA</strong> : nous ne
-          proposons que des véhicules dont l&apos;état, l&apos;historique et le dossier administratif
-          justifient ce niveau de prix.
+          Tout le parc de {site.legalName}, mis à jour en continu. Nous ne proposons que des véhicules
+          dont l&apos;état, l&apos;historique et le dossier administratif ont été vérifiés.
         </p>
         <p className="lead mb-8">
           Chaque véhicule est contrôlé avant sa mise en vente, ses papiers sont complets à votre nom, et
@@ -45,11 +43,11 @@ export default async function CataloguePage() {
           prix exact se discute de vive voix : appelez ou écrivez sur WhatsApp, réponse le jour même.
         </p>
 
-        <VehicleGrid vehicles={vehicles} />
+        <VehicleSearch vehicles={vehicles} />
         <FacetNav vehicles={vehicles} />
 
         <div className="card p-6 mt-10 hover:!translate-y-0">
-          <h2 className="text-[19px] tracking-[-.03em] mb-3">Vous ne trouvez pas votre modèle ?</h2>
+          <h2 className="text-[19px] tracking-[-.03em] mb-3">Vous cherchez un autre modèle ?</h2>
           <p className="lead mb-4">
             Nous commandons depuis le Japon, Dubaï et l&apos;Europe le véhicule exact que vous cherchez,
             avec rapport d&apos;inspection avant achat et dédouanement inclus.

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Arrow, Fuel, Gauge, Gearbox, Seat } from "@/components/ui/icons";
 import { VehicleVisual } from "./VehicleVisual";
 import { QuickView } from "./QuickView";
-import type { Vehicle } from "@/data/vehicles";
+import { formatPrice, type Vehicle } from "@/data/vehicles";
 
 const Spec = ({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) => (
   <span className="flex items-center gap-2 text-[12px]" style={{ color: "var(--ink-2)" }}>
@@ -25,8 +25,6 @@ const Spec = ({ icon, children }: { icon: React.ReactNode; children: React.React
  * page, et un panneau modal n'a pas d'adresse à partager.
  */
 export function VehicleCard({ vehicle, index = 0 }: { vehicle: Vehicle; index?: number }) {
-  const onOrder = vehicle.status === "commande";
-
   return (
     <motion.article
       layout
@@ -46,13 +44,9 @@ export function VehicleCard({ vehicle, index = 0 }: { vehicle: Vehicle; index?: 
         <span className="scanline" />
         <span
           className="absolute top-3 left-3 z-[3] px-2.5 py-1.5 rounded-full text-[10px] font-medium backdrop-blur-md border"
-          style={
-            onOrder
-              ? { background: "rgba(4,18,34,.62)", color: "#8AD6FF", borderColor: "rgba(138,214,255,.45)" }
-              : { background: "rgba(5,24,16,.62)", color: "#5BE49B", borderColor: "rgba(91,228,155,.45)" }
-          }
+          style={{ background: "rgba(5,24,16,.62)", color: "#5BE49B", borderColor: "rgba(91,228,155,.45)" }}
         >
-          {onOrder ? "Sur commande" : "Disponible"}
+          Disponible
         </span>
         <span
           className="absolute top-3 right-3 z-[3] px-2.5 py-1.5 rounded-full text-[10.5px] font-medium tnum backdrop-blur-md border"
@@ -89,10 +83,18 @@ export function VehicleCard({ vehicle, index = 0 }: { vehicle: Vehicle; index?: 
 
         <div className="mt-auto flex items-center justify-between gap-2.5 pt-3.5 border-t" style={{ borderColor: "var(--line)" }}>
           <span>
-            <b className="block text-[13px] font-medium">Prix sur demande</b>
-            <small className="block text-[11px]" style={{ color: "var(--ink-3)" }}>
-              Communiqué par téléphone
-            </small>
+            {vehicle.price ? (
+              <b className="block text-[15px] font-medium tnum" style={{ color: "var(--brand)" }}>
+                {formatPrice(vehicle.price)}
+              </b>
+            ) : (
+              <>
+                <b className="block text-[13px] font-medium">Prix sur demande</b>
+                <small className="block text-[11px]" style={{ color: "var(--ink-3)" }}>
+                  Communiqué par téléphone
+                </small>
+              </>
+            )}
           </span>
           <span
             className="w-10 h-10 rounded-full border grid place-items-center shrink-0 transition-all duration-400

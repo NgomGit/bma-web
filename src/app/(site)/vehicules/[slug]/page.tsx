@@ -5,10 +5,10 @@ import { Silhouette } from "@/components/vehicle/VehicleVisual";
 import { Gallery } from "@/components/vehicle/Gallery";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { VehicleGrid } from "@/components/seo/VehicleGrid";
-import { ArrowLeft, Check, Phone, WhatsApp } from "@/components/ui/icons";
+import { ArrowLeft, Phone, WhatsApp } from "@/components/ui/icons";
 import { JsonLd, breadcrumbLd, dealerLd, graph, meta, vehicleLd } from "@/lib/seo";
 import { getVehicle, getVehicles } from "@/lib/store";
-import { BODY_PLURAL, BODY_SLUGS, slugify } from "@/data/vehicles";
+import { BODY_PLURAL, BODY_SLUGS, formatPrice, slugify } from "@/data/vehicles";
 import { site, waVehicle } from "@/lib/site";
 
 export async function generateStaticParams() {
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return meta({
     title: `${v.brand} ${v.model} ${v.year} — ${v.mileage} | Dakar`,
-    description: `${v.brand} ${v.model} ${v.year} d'occasion à Dakar : ${v.mileage}, boîte ${v.gearbox.toLowerCase()}, ${v.fuel.toLowerCase()}, ${v.engine} ${v.power}, ${v.seats} places. ${v.origin}, papiers en règle, essai avant achat. Prix sur demande — à partir de 10 millions FCFA.`,
+    description: `${v.brand} ${v.model} ${v.year} d'occasion à Dakar : ${v.mileage}, boîte ${v.gearbox.toLowerCase()}, ${v.fuel.toLowerCase()}, ${v.engine} ${v.power}, ${v.seats} places. ${v.origin}, papiers en règle, essai avant achat. Prix communiqué par téléphone.`,
     path: `/vehicules/${v.slug}`,
     keywords: [
       `${v.brand} ${v.model} Dakar`,
@@ -91,15 +91,33 @@ export default async function VehiclePage({ params }: { params: Promise<{ slug: 
           )}
 
           <div>
-            <span className="kicker">
-              {v.status === "commande" ? `Sur commande · ${v.lead}` : "Disponible au showroom de Dakar"}
-            </span>
+            <span className="kicker">Disponible au showroom de Dakar</span>
             <h1 className="h2 mt-4">
               {v.brand} {v.model}
             </h1>
             <p className="lead mt-3">
               {v.year} · {v.mileage} · {v.origin}
             </p>
+
+            {/* le prix est la première chose que l'on cherche : il passe avant la fiche technique */}
+            <div
+              className="mt-6 rounded-[var(--r2)] border p-4 px-5"
+              style={{ background: "var(--surf-2)", borderColor: "var(--line-2)" }}
+            >
+              <span className="block text-[9.5px] tracking-[.16em] uppercase" style={{ color: "var(--ink-3)" }}>
+                Prix
+              </span>
+              {v.price ? (
+                <b className="block mt-1.5 text-[26px] font-bold tracking-[-.03em] tnum" style={{ color: "var(--brand)" }}>
+                  {formatPrice(v.price)}
+                </b>
+              ) : (
+                <b className="block mt-1.5 text-[19px] font-medium">Prix communiqué par téléphone</b>
+              )}
+              <p className="text-[12.5px] mt-1" style={{ color: "var(--ink-2)" }}>
+                Appelez ou écrivez sur WhatsApp — réponse le jour même.
+              </p>
+            </div>
 
             <h2 className="text-[12px] tracking-[.16em] uppercase font-medium mt-8 mb-3.5" style={{ color: "var(--brand)" }}>
               Fiche technique
@@ -115,34 +133,6 @@ export default async function VehiclePage({ params }: { params: Promise<{ slug: 
                 </div>
               ))}
             </dl>
-
-            <h2 className="text-[12px] tracking-[.16em] uppercase font-medium mt-8 mb-3.5" style={{ color: "var(--brand)" }}>
-              Équipements
-            </h2>
-            <ul className="grid sm:grid-cols-2 gap-2.5 list-none p-0 m-0">
-              {v.equipment.map((e) => (
-                <li key={e} className="flex gap-2.5 text-[13.5px]" style={{ color: "var(--ink-2)" }}>
-                  <span className="shrink-0 mt-[3px]" style={{ color: "#2FBB74" }}>
-                    <Check className="w-[15px] h-[15px]" />
-                  </span>
-                  <span>{e}</span>
-                </li>
-              ))}
-            </ul>
-
-            <h2 className="text-[12px] tracking-[.16em] uppercase font-medium mt-8 mb-3" style={{ color: "var(--brand)" }}>
-              Le mot de BMA
-            </h2>
-            <p className="lead">{v.note}</p>
-
-            <div
-              className="p-4 px-[18px] rounded-[var(--r2)] border text-[13px] mt-7"
-              style={{ background: "var(--surf-2)", borderColor: "var(--line-2)", color: "var(--ink-2)" }}
-            >
-              <b style={{ color: "var(--ink)", fontWeight: 500 }}>Prix communiqué sur demande.</b> Notre parc
-              démarre à 10 000 000 FCFA ; le tarif exact de ce véhicule dépend de son état réel et de votre
-              mode de paiement. Appelez ou écrivez sur WhatsApp — réponse le jour même.
-            </div>
 
             <div className="grid grid-cols-2 gap-2.5 mt-6">
               <a href={`tel:${site.phone}`} className="btn btn--primary"><Phone /> Appeler</a>

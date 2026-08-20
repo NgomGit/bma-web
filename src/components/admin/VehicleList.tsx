@@ -164,16 +164,6 @@ function Row({
           <span className="text-[10px] font-medium tracking-[.16em] uppercase" style={{ color: "var(--brand)" }}>
             {v.brand}
           </span>
-          <span
-            className="px-2 py-0.5 rounded-full text-[10px] font-medium border"
-            style={
-              v.status === "commande"
-                ? { color: "var(--brand)", borderColor: "color-mix(in oklab, var(--brand) 40%, transparent)" }
-                : { color: "#2FBB74", borderColor: "rgba(47,187,116,.4)" }
-            }
-          >
-            {v.status === "commande" ? "Sur commande" : "Disponible"}
-          </span>
           {v.featured && (
             <span
               className="px-2 py-0.5 rounded-full text-[10px] font-medium border"

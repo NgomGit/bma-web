@@ -5,9 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Silhouette } from "./VehicleVisual";
-import { Arrow, Check, Close, Phone, WhatsApp } from "@/components/ui/icons";
+import { Arrow, Close, Phone, WhatsApp } from "@/components/ui/icons";
 import { site, waVehicle } from "@/lib/site";
-import type { Vehicle } from "@/data/vehicles";
+import { formatPrice, type Vehicle } from "@/data/vehicles";
 
 type Ctx = { open: (v: Vehicle) => void; close: () => void };
 const SheetCtx = createContext<Ctx | null>(null);
@@ -33,17 +33,13 @@ export const useVehicleSheet = () => {
   return c;
 };
 
-const TABS = ["Fiche technique", "Équipements", "Le mot de BMA"] as const;
-
 export function VehicleSheetProvider({ children }: { children: ReactNode }) {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
-  const [tab, setTab] = useState(0);
   const [tint, setTint] = useState<string | undefined>();
   const isDesktop = useIsDesktop();
 
   const open = useCallback((v: Vehicle) => {
     setVehicle(v);
-    setTab(0);
     setTint(v.swatches[0]);
   }, []);
   const close = useCallback(() => setVehicle(null), []);
@@ -186,7 +182,7 @@ export function VehicleSheetProvider({ children }: { children: ReactNode }) {
               <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
                 <div className="px-5 pt-6 md:px-8 md:pt-9">
                   <span className="kicker">
-                    {vehicle.status === "commande" ? `Sur commande · ${vehicle.lead}` : "Disponible au showroom"}
+                    Disponible au showroom
                   </span>
                   <h2 className="h2 mt-3.5" style={{ fontSize: "clamp(24px,4vw,38px)" }}>
                     {vehicle.model}
@@ -195,62 +191,35 @@ export function VehicleSheetProvider({ children }: { children: ReactNode }) {
                     {vehicle.brand} · {vehicle.origin}
                   </p>
 
-                  <div className="flex gap-0.5 mt-5 border-b overflow-x-auto no-bar" style={{ borderColor: "var(--line)" }}>
-                    {TABS.map((t, i) => (
-                      <button
-                        key={t}
-                        onClick={() => setTab(i)}
-                        className="relative shrink-0 whitespace-nowrap px-3.5 py-3 text-[13px] transition-colors"
-                        style={{ color: tab === i ? "var(--ink)" : "var(--ink-3)", fontWeight: tab === i ? 500 : 300 }}
-                      >
-                        {t}
-                        {tab === i && (
-                          <motion.span
-                            layoutId="tab-underline"
-                            className="absolute left-3.5 right-3.5 -bottom-px h-0.5 rounded"
-                            style={{ background: "var(--brand)" }}
-                          />
-                        )}
-                      </button>
-                    ))}
-                  </div>
-
-                  <div className="py-6">
-                    {tab === 0 && (
-                      <div
-                        className="grid grid-cols-2 sm:grid-cols-3 gap-px rounded-[var(--r2)] overflow-hidden border"
-                        style={{ background: "var(--line)", borderColor: "var(--line)" }}
-                      >
-                        {specs.map(([k, v]) => (
-                          <div key={k} className="p-3.5" style={{ background: "var(--surf)" }}>
-                            <span className="block text-[9.5px] tracking-[.15em] uppercase" style={{ color: "var(--ink-3)" }}>
-                              {k}
-                            </span>
-                            <b className="block mt-1.5 text-[14px] font-medium">{v}</b>
-                          </div>
-                        ))}
-                      </div>
+                  {/* le prix d'abord, la fiche technique ensuite */}
+                  <div
+                    className="mt-5 mb-5 rounded-[var(--r2)] border p-4 px-5"
+                    style={{ background: "var(--surf-2)", borderColor: "var(--line-2)" }}
+                  >
+                    <span className="block text-[9.5px] tracking-[.16em] uppercase" style={{ color: "var(--ink-3)" }}>
+                      Prix
+                    </span>
+                    {vehicle.price ? (
+                      <b className="block mt-1.5 text-[24px] font-bold tracking-[-.03em] tnum" style={{ color: "var(--brand)" }}>
+                        {formatPrice(vehicle.price)}
+                      </b>
+                    ) : (
+                      <b className="block mt-1.5 text-[18px] font-medium">Prix communiqué par téléphone</b>
                     )}
-                    {tab === 1 && (
-                      <ul className="grid sm:grid-cols-2 gap-2.5 list-none p-0 m-0">
-                        {vehicle.equipment.map((e) => (
-                          <li key={e} className="flex gap-2.5 text-[13.5px]" style={{ color: "var(--ink-2)" }}>
-                            <Check className="w-[15px] h-[15px] shrink-0 mt-[3px]" />
-                            <span>{e}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                    {tab === 2 && <p className="lead">{vehicle.note}</p>}
                   </div>
 
                   <div
-                    className="p-4 px-[18px] rounded-[var(--r2)] border text-[13px] mb-6"
-                    style={{ background: "var(--surf-2)", borderColor: "var(--line-2)", color: "var(--ink-2)" }}
+                    className="grid grid-cols-2 sm:grid-cols-3 gap-px rounded-[var(--r2)] overflow-hidden border mb-6"
+                    style={{ background: "var(--line)", borderColor: "var(--line)" }}
                   >
-                    <b style={{ color: "var(--ink)", fontWeight: 500 }}>Prix communiqué sur demande.</b> Le tarif dépend de
-                    l&apos;état exact du véhicule et de votre mode de paiement. Appelez ou écrivez sur WhatsApp — réponse le
-                    jour même.
+                    {specs.map(([k, val]) => (
+                      <div key={k} className="p-3.5" style={{ background: "var(--surf)" }}>
+                        <span className="block text-[9.5px] tracking-[.15em] uppercase" style={{ color: "var(--ink-3)" }}>
+                          {k}
+                        </span>
+                        <b className="block mt-1.5 text-[14px] font-medium">{val}</b>
+                      </div>
+                    ))}
                   </div>
 
                   {/* La navigation est côté client : sans ce `close`, le panneau

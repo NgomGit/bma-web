@@ -19,8 +19,6 @@ export default async function AdminHome({
   searchParams: Promise<{ enregistre?: string; supprime?: string }>;
 }) {
   const [vehicles, sp] = await Promise.all([getVehicles(), searchParams]);
-  const available = vehicles.filter((v) => v.status === "disponible").length;
-  const onOrder = vehicles.filter((v) => v.status === "commande").length;
   const featured = vehicles.filter((v) => v.featured).length;
   const noPhoto = vehicles.filter((v) => !v.photos?.length).length;
 
@@ -53,8 +51,6 @@ export default async function AdminHome({
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-px rounded-[var(--r2)] overflow-hidden border mb-7"
            style={{ background: "var(--line)", borderColor: "var(--line)" }}>
-        <Stat n={available} label="disponibles au showroom" />
-        <Stat n={onOrder} label="sur commande" />
         <Stat n={featured} label="mis en avant" />
         <Stat n={noPhoto} label="sans photo" />
       </div>

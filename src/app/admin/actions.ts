@@ -7,15 +7,21 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { COOKIE, SESSION_MAX_AGE, createToken, isSignedIn, passwordMatches } from "@/lib/auth";
 import { getVehicle, makeSlug, putVehicle, removeVehicle, setOrder } from "@/lib/store";
-import type { Availability, BodyType, Vehicle } from "@/data/vehicles";
+import type { BodyType, Vehicle } from "@/data/vehicles";
 
 export type FormState = { error?: string; ok?: string };
 
-/** Rafraîchit toutes les pages publiques qui affichent des véhicules */
+/**
+ * Rafraîchit toutes les pages publiques qui affichent des véhicules.
+ *
+ * On invalide la mise en page racine plutôt qu'une liste de chemins : un même
+ * véhicule apparaît sur l'accueil, le catalogue, sa fiche, la page de sa marque,
+ * celle de sa carrosserie et le plan du site. Énumérer ces chemins était source
+ * d'oublis — le catalogue, justement, n'était jamais rafraîchi.
+ */
 function refreshPublicPages(slug?: string) {
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   revalidatePath("/sitemap.xml");
-  revalidatePath("/admin");
   if (slug) revalidatePath(`/vehicules/${slug}`);
 }
 
@@ -79,8 +85,6 @@ export async function saveVehicle(_prev: FormState, formData: FormData): Promise
     return { error: `Un véhicule porte déjà l'identifiant « ${slug} ». Modifiez le modèle ou l'année.` };
   }
 
-  const status = (String(formData.get("status")) as Availability) || "disponible";
-
   const vehicle: Vehicle = {
     slug,
     brand,
@@ -96,15 +100,17 @@ export async function saveVehicle(_prev: FormState, formData: FormData): Promise
     color: String(formData.get("color") ?? "").trim(),
     drivetrain: String(formData.get("drivetrain") ?? "").trim(),
     bodywork: String(formData.get("bodywork") ?? "").trim(),
-    status,
     origin: String(formData.get("origin") ?? "").trim(),
-    lead: status === "commande" ? String(formData.get("lead") ?? "").trim() || undefined : undefined,
     swatches: lines(formData.get("swatches")),
     note: String(formData.get("note") ?? "").trim(),
     equipment: lines(formData.get("equipment")),
     featured: formData.get("featured") === "on",
     photos: lines(formData.get("photos")),
   };
+  // un prix vide ou nul signifie « sur demande » : on ne stocke rien
+  const price = Number(String(formData.get("price") ?? "").replace(/\D/g, ""));
+  if (price > 0) vehicle.price = price;
+
   if (!vehicle.swatches.length) vehicle.swatches = ["#8AD6FF", "#C8D3DE", "#1F2A36", "#7E6A55"];
   if (!vehicle.photos?.length) delete vehicle.photos;
 

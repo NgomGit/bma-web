@@ -67,7 +67,6 @@ function Submit({ children }: { children: React.ReactNode }) {
 export function VehicleForm({ vehicle }: { vehicle?: Vehicle }) {
   const [state, action] = useActionState<FormState, FormData>(saveVehicle, {});
   const [body, setBody] = useState<BodyType>(vehicle?.body ?? "suv");
-  const [status, setStatus] = useState(vehicle?.status ?? "disponible");
   const isNew = !vehicle;
 
   return (
@@ -129,27 +128,18 @@ export function VehicleForm({ vehicle }: { vehicle?: Vehicle }) {
 
         <fieldset className="card p-5 grid gap-4 hover:!translate-y-0 hover:!shadow-[var(--sh-s)]">
           <legend className="px-2 text-[11px] font-medium tracking-[.16em] uppercase" style={{ color: "var(--brand)" }}>
-            Disponibilité
+            Provenance
           </legend>
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block">
-              <span className="block text-[11px] font-medium tracking-[.1em] uppercase mb-1.5" style={{ color: "var(--ink-3)" }}>
-                Statut
-              </span>
-              <select
-                name="status" value={status} onChange={(e) => setStatus(e.target.value as typeof status)}
-                className="w-full rounded-[10px] border px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--brand)]"
-                style={{ background: "var(--surf-2)", borderColor: "var(--line-2)", color: "var(--ink)" }}
-              >
-                <option value="disponible">Disponible au showroom</option>
-                <option value="commande">Sur commande</option>
-              </select>
-            </label>
             <Field label="Provenance" name="origin" defaultValue={vehicle?.origin} placeholder="Importé du Japon" />
-            {status === "commande" && (
-              <Field label="Délai annoncé" name="lead" defaultValue={vehicle?.lead}
-                     placeholder="délai estimé 45 jours" hint="Affiché à côté de « Sur commande »." />
-            )}
+            <Field
+              label="Prix en FCFA"
+              name="price"
+              type="number"
+              defaultValue={vehicle?.price ? String(vehicle.price) : ""}
+              placeholder="28500000"
+              hint="Chiffres uniquement, sans espaces. Laisser vide affiche « Prix sur demande »."
+            />
           </div>
           <label className="flex items-center gap-3 text-[14px] cursor-pointer">
             <input type="checkbox" name="featured" defaultChecked={vehicle?.featured} className="w-4 h-4 accent-[var(--brand)]" />

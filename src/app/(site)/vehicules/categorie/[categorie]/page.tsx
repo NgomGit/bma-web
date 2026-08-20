@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: { params: Promise<{ categorie
   const { label, vehicles } = data;
   return meta({
     title: `${label.charAt(0).toUpperCase() + label.slice(1)} d'occasion à Dakar | BMA`,
-    description: `${vehicles.length} ${label} d'occasion vérifiés à Dakar chez BMA : papiers en règle, essai avant achat, import sur commande. Gamme à partir de 10 000 000 FCFA, prix communiqué par téléphone.`,
+    description: `${vehicles.length} ${label} d'occasion vérifiés à Dakar chez BMA : papiers en règle, essai avant achat, import sur commande. Prix communiqué par téléphone.`,
     path: `/vehicules/categorie/${categorie}`,
     keywords: [
       `${label} occasion Dakar`, `${label} Sénégal`, `acheter ${label} Dakar`,
@@ -67,9 +67,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         <p className="lead mb-3">{PITCH[body]}</p>
         <p className="lead mb-8">
           Tous nos {label} sont contrôlés avant mise en vente et livrés avec carte grise, quitus fiscal et
-          dédouanement à votre nom. La gamme démarre à{" "}
-          <strong style={{ color: "var(--ink)", fontWeight: 500 }}>10 000 000 FCFA</strong> ; le prix
-          exact dépend de l&apos;état réel du véhicule et se communique par téléphone.
+          dédouanement à votre nom. Le prix exact dépend de l&apos;état réel du véhicule et se communique
+          par téléphone.
         </p>
 
         <VehicleGrid vehicles={vehicles} />

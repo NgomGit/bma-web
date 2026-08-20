@@ -86,7 +86,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
               fontSize: 18, color: "#8AD6FF", fontWeight: 500,
             }}
           >
-            {v.status === "commande" ? "Sur commande" : "Disponible"}
+            Disponible
           </div>
         </div>
 
@@ -127,7 +127,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             ))}
           </div>
           <span style={{ fontSize: 19, color: "#7B93AC", marginTop: 18 }}>
-            Prix sur demande · à partir de 10 millions FCFA · {site.phoneDisplay}
+            Prix sur demande · {site.phoneDisplay}
           </span>
         </div>
       </div>

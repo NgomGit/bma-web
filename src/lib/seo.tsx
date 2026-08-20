@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
-import { PRICE_FLOOR_XOF, type Vehicle } from "@/data/vehicles";
+import { type Vehicle } from "@/data/vehicles";
 import { site } from "./site";
 
 /**
  * Fabrique de métadonnées et de données structurées.
  *
  * Principe directeur : le balisage ne déclare QUE ce qui est visible sur la page.
- * Google sanctionne les données structurées qui ne correspondent pas au contenu —
- * c'est pourquoi le plancher de 10 000 000 FCFA est aussi écrit noir sur blanc
- * dans le site, et pas seulement dans le JSON-LD.
+ * Google sanctionne les données structurées qui ne correspondent pas au contenu.
+ * Aucun prix plancher n'est donc déclaré ici : il n'est plus affiché nulle part.
  */
 
 const DEALER_ID = `${site.url}/#concessionnaire`;
@@ -59,9 +58,10 @@ export function dealerLd() {
     alternateName: [site.name, site.legalName],
     url: site.url,
     telephone: site.phone,
+    hasMap: site.maps,
     image: `${site.url}/icon.svg`,
     description:
-      "Concessionnaire automobile à Dakar. Véhicules d'occasion vérifiés à partir de 10 000 000 FCFA, papiers en règle, essai avant achat et import sur commande depuis le Japon, Dubaï et l'Europe.",
+      "Concessionnaire automobile à Dakar. Véhicules d'occasion vérifiés, papiers en règle, essai avant achat et import sur commande depuis le Japon, Dubaï et l'Europe.",
     address: {
       "@type": "PostalAddress",
       streetAddress: site.address.street,
@@ -80,18 +80,13 @@ export function dealerLd() {
         closes: "19:30",
       },
     ],
-    priceRange: "à partir de 10 000 000 FCFA",
+    priceRange: "$$$",
     currenciesAccepted: "XOF",
     knowsLanguage: ["fr", "wo"],
     makesOffer: {
       "@type": "Offer",
       itemOffered: { "@type": "Car" },
-      priceSpecification: {
-        "@type": "PriceSpecification",
-        minPrice: PRICE_FLOOR_XOF,
-        priceCurrency: "XOF",
-        valueAddedTaxIncluded: true,
-      },
+      priceCurrency: "XOF",
     },
   };
 }
@@ -134,16 +129,20 @@ export function vehicleLd(v: Vehicle) {
     offers: {
       "@type": "Offer",
       "@id": `${site.url}/vehicules/${v.slug}#offre`,
-      availability:
-        v.status === "commande" ? "https://schema.org/PreOrder" : "https://schema.org/InStock",
+      // tout le parc est physiquement au showroom
+      availability: "https://schema.org/InStock",
       itemCondition: "https://schema.org/UsedCondition",
       priceCurrency: "XOF",
-      priceSpecification: {
-        "@type": "PriceSpecification",
-        minPrice: PRICE_FLOOR_XOF,
-        priceCurrency: "XOF",
-        description: "Prix communiqué sur demande, par téléphone ou WhatsApp",
-      },
+      // un prix n'est déclaré que s'il est réellement affiché sur la page
+      ...(v.price
+        ? { price: v.price }
+        : {
+            priceSpecification: {
+              "@type": "PriceSpecification",
+              priceCurrency: "XOF",
+              description: "Prix communiqué sur demande, par téléphone ou WhatsApp",
+            },
+          }),
       seller: { "@id": DEALER_ID },
       availableAtOrFrom: {
         "@type": "Place",

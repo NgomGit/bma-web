@@ -46,23 +46,36 @@ export interface Vehicle {
  * Il doit donc refléter le parc réel — sinon le site mis en ligne afficherait
  * un parc de démonstration.
  */
+/**
+ * Parc de départ.
+ *
+ * ⚠️ Ce tableau n'est PAS la source de vérité en fonctionnement : dès le premier
+ * démarrage, `src/lib/store.ts` le recopie dans `data/vehicles.json`, et c'est ce
+ * fichier-là que le back-office modifie ensuite.
+ *
+ * Il compte quand même, parce que `data/*.json` est exclu de Git : sur un
+ * déploiement neuf, le fichier n'existe pas et c'est ce tableau qui est écrit.
+ * Il doit donc refléter le parc réel — sinon le site mis en ligne afficherait
+ * un parc de démonstration.
+ */
 export const seedVehicles: Vehicle[] = [
   {
     slug: "mercedes-benz-gle",
     brand: "Mercedes-Benz",
-    model: "GLE AMG Line",
+    model: "GLE 450 AMG Line",
     body: "suv",
-    year: 2021,
-    mileage: "62 000 km",
+    year: 2022,
+    mileage: "38 000 km",
     gearbox: "Automatique",
-    fuel: "Diesel",
+    fuel: "Essence",
     seats: 5,
-    engine: "Diesel 4MATIC",
-    power: "Puissance sur demande",
+    engine: "3.0 six cylindres EQ Boost",
+    power: "367 ch",
     color: "Vert émeraude métallisé",
     drivetrain: "4MATIC intégrale",
     bodywork: "SUV 5 portes",
     origin: "Importé de Belgique",
+    price: 47000000,
     featured: true,
     swatches: ["#12291F", "#0B1712", "#C9B693", "#6E7A72"],
     note:
@@ -70,6 +83,7 @@ export const seedVehicles: Vehicle[] = [
     equipment: [
       "Pack extérieur AMG Line, calandre diamant",
       "Jantes AMG multibranches, étriers apparents",
+      "Six cylindres en ligne essence 367 ch, micro-hybridation EQ Boost",
       "Transmission intégrale 4MATIC",
       "Boîte automatique 9G-TRONIC",
       "Sellerie cuir beige macchiato",
@@ -95,8 +109,8 @@ export const seedVehicles: Vehicle[] = [
     brand: "BMW",
     model: "X4 M40i",
     body: "crossover",
-    year: 2019,
-    mileage: "78 000 km",
+    year: 2020,
+    mileage: "76 000 km",
     gearbox: "Automatique",
     fuel: "Essence",
     seats: 5,
@@ -105,7 +119,8 @@ export const seedVehicles: Vehicle[] = [
     color: "Bleu Phytonic métallisé",
     drivetrain: "xDrive intégrale",
     bodywork: "SUV coupé 5 portes",
-    origin: "Importé de Belgique",
+    origin: "Importé de Belgique — version européenne",
+    price: 42000000,
     featured: true,
     swatches: ["#1E3A5F", "#0B1420", "#C8D3DE", "#7B8794"],
     note:
@@ -134,12 +149,52 @@ export const seedVehicles: Vehicle[] = [
     ],
   },
   {
+    slug: "ford-ranger-raptor-2022",
+    brand: "Ford",
+    model: "Ranger Raptor",
+    body: "pickup",
+    year: 2022,
+    mileage: "56 000 km",
+    gearbox: "Automatique",
+    fuel: "Diesel",
+    seats: 5,
+    engine: "2.0 EcoBlue bi-turbo",
+    power: "213 ch",
+    color: "Gris Conquer, bandes rouges et noires",
+    drivetrain: "4×4 enclenchable",
+    bodywork: "Pick-up double cabine",
+    origin: "Importé d'Europe",
+    price: 32000000,
+    featured: true,
+    swatches: ["#8B9296", "#3A3F44", "#B3261E", "#12161A"],
+    note:
+      "Le même Raptor, deux ans plus jeune et bien moins roulé — avec en prime les bandes de capot rouges et noires qui le distinguent au premier coup d'œil. Châssis renforcé, amortisseurs Fox Racing et pneus tout-terrain d'origine : c'est le pick-up qui encaisse la piste sans se plaindre.",
+    equipment: [
+      "Amortisseurs Fox Racing 2.5 Internal Bypass",
+      "Voies élargies et châssis renforcé",
+      "4×4 avec réducteur et blocage de différentiel arrière",
+      "Six modes Terrain Management",
+      "Boîte automatique 10 rapports, palettes au volant",
+      "Sièges baquets Raptor cuir et alcantara",
+      "Bandes de capot rouges et noires",
+      "Pneus tout-terrain, jantes 17 pouces",
+      "Caméra de recul et radars de stationnement",
+      "Écran tactile SYNC 3, Apple CarPlay et Android Auto",
+    ],
+    photos: [
+      "/vehicules/ford-ranger-raptor-2022/01-cover.jpg",
+      "/vehicules/ford-ranger-raptor-2022/02-face.jpg",
+      "/vehicules/ford-ranger-raptor-2022/03-avant-trois-quarts.jpg",
+      "/vehicules/ford-ranger-raptor-2022/04-sieges-raptor.jpg",
+    ],
+  },
+  {
     slug: "ford-ranger-raptor",
     brand: "Ford",
     model: "Ranger Raptor",
     body: "pickup",
-    year: 2021,
-    mileage: "55 000 km",
+    year: 2020,
+    mileage: "83 000 km",
     gearbox: "Automatique",
     fuel: "Diesel",
     seats: 5,
@@ -149,6 +204,7 @@ export const seedVehicles: Vehicle[] = [
     drivetrain: "4×4 enclenchable",
     bodywork: "Pick-up double cabine",
     origin: "Importé d'Europe",
+    price: 29000000,
     featured: true,
     swatches: ["#8B9296", "#3A3F44", "#12161A", "#C4C9CC"],
     note:
@@ -182,7 +238,7 @@ export const seedVehicles: Vehicle[] = [
     model: "Range Rover Sport",
     body: "suv",
     year: 2016,
-    mileage: "118 000 km",
+    mileage: "69 000 km",
     gearbox: "Automatique",
     fuel: "Diesel",
     seats: 7,
@@ -192,6 +248,7 @@ export const seedVehicles: Vehicle[] = [
     drivetrain: "4×4 permanent",
     bodywork: "SUV 5 portes",
     origin: "Importé d'Europe",
+    price: 18500000,
     featured: true,
     swatches: ["#5C6167", "#2B2F34", "#D2D7DC", "#8E959C"],
     note:

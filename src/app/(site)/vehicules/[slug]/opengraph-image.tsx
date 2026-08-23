@@ -3,6 +3,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { SILHOUETTES } from "@/components/brand/paths";
 import { getVehicle, getVehicles } from "@/lib/store";
+import { formatPrice } from "@/data/vehicles";
 import { site } from "@/lib/site";
 
 /**
@@ -127,7 +128,7 @@ export default async function Image({ params }: { params: Promise<{ slug: string
             ))}
           </div>
           <span style={{ fontSize: 19, color: "#7B93AC", marginTop: 18 }}>
-            Prix sur demande · {site.phoneDisplay}
+            {v.price ? formatPrice(v.price) : "Prix sur demande"} · {site.phoneDisplay}
           </span>
         </div>
       </div>

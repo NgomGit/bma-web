@@ -6,7 +6,7 @@ import { Arrow, ArrowLeft } from "@/components/ui/icons";
 import { VehicleVisual } from "@/components/vehicle/VehicleVisual";
 import { useVehicleSheet } from "@/components/vehicle/SheetProvider";
 import { Reveal } from "@/components/ui/Reveal";
-import type { Vehicle } from "@/data/vehicles";
+import { formatPrice, type Vehicle } from "@/data/vehicles";
 
 /** Rail « Sélection » — défilement horizontal avec accroche, index de catalogue */
 export function Selection({ vehicles }: { vehicles: Vehicle[] }) {
@@ -33,9 +33,11 @@ export function Selection({ vehicles }: { vehicles: Vehicle[] }) {
               <br />
               du moment
             </h2>
+            {/* le compte suit le parc : il y avait « Trois véhicules » en dur,
+                faux dès qu'une voiture entrait ou sortait de la sélection */}
             <p className="lead mt-3.5">
-              Trois véhicules que nous recommandons cette semaine, choisis pour leur état, leur historique et leur
-              dossier complet.
+              {vehicles.length === 1 ? "Un véhicule que nous recommandons" : `${vehicles.length} véhicules que nous recommandons`}{" "}
+              cette semaine, choisis pour leur état, leur historique et leur dossier complet.
             </p>
           </div>
           <div className="flex gap-2.5">
@@ -95,10 +97,16 @@ export function Selection({ vehicles }: { vehicles: Vehicle[] }) {
                 <h3 className="text-[21px] mt-1.5 tracking-[-.03em]">{v.model}</h3>
                 <div className="mt-4 flex items-center justify-between gap-3 pt-3.5 border-t" style={{ borderColor: "var(--line)" }}>
                   <span>
-                    <small className="block text-[11px]" style={{ color: "var(--ink-3)" }}>
-                      Prix sur demande
-                    </small>
-                    <b className="block text-[13.5px] font-medium tnum">
+                    {v.price ? (
+                      <b className="block text-[17px] font-medium tnum" style={{ color: "var(--brand)" }}>
+                        {formatPrice(v.price)}
+                      </b>
+                    ) : (
+                      <small className="block text-[11px]" style={{ color: "var(--ink-3)" }}>
+                        Prix sur demande
+                      </small>
+                    )}
+                    <b className="block text-[13.5px] font-medium tnum" style={v.price ? { color: "var(--ink-2)", fontWeight: 300 } : undefined}>
                       {v.year} · {v.mileage}
                     </b>
                   </span>

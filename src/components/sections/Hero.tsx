@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Silhouette } from "@/components/vehicle/VehicleVisual";
 import { Arrow, Doc, Key, Phone, Ship, Shield } from "@/components/ui/icons";
-import type { Vehicle } from "@/data/vehicles";
+import { formatPrice, type Vehicle } from "@/data/vehicles";
 import { site } from "@/lib/site";
 
 const LINES = ["Le véhicule", "qui vous", "ressemble."];
@@ -36,11 +36,16 @@ export function Hero({ vehicles }: { vehicles: Vehicle[] }) {
     return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
 
+  /**
+   * Le prix prend la place de la puissance dès qu'il est renseigné : à ce
+   * niveau de gamme, un acheteur situe la voiture par son tarif avant de
+   * s'intéresser aux chevaux, et la carte du hero ne tient que quatre cases.
+   */
   const specs: [string, string][] = [
     ["Année", String(v.year)],
     ["Kilométrage", v.mileage],
     ["Motorisation", v.engine],
-    ["Puissance", v.power],
+    v.price ? ["Prix", formatPrice(v.price)] : ["Puissance", v.power],
   ];
 
   return (

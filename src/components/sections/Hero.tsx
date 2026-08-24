@@ -37,14 +37,12 @@ export function Hero({ vehicles }: { vehicles: Vehicle[] }) {
   }, []);
 
   /**
-   * Le prix prend la place de la puissance dès qu'il est renseigné : à ce
-   * niveau de gamme, un acheteur situe la voiture par son tarif avant de
-   * s'intéresser aux chevaux, et la carte du hero ne tient que quatre cases.
+   * Trois repères, pas plus : c'est ce qu'on lit d'un coup d'œil sur une
+   * vignette. La motorisation, trop longue pour la case, se lit sur la fiche.
    */
   const specs: [string, string][] = [
     ["Année", String(v.year)],
     ["Kilométrage", v.mileage],
-    ["Motorisation", v.engine],
     v.price ? ["Prix", formatPrice(v.price)] : ["Puissance", v.power],
   ];
 
@@ -174,7 +172,7 @@ export function Hero({ vehicles }: { vehicles: Vehicle[] }) {
               </div>
 
               <div
-                className="relative z-[3] grid grid-cols-2 sm:grid-cols-4 gap-px mt-4.5 border-t"
+                className="relative z-[3] grid grid-cols-3 gap-px mt-4.5 border-t"
                 style={{ background: "var(--line)", borderColor: "var(--line)", marginTop: 18 }}
               >
                 {specs.map(([k, val]) => (

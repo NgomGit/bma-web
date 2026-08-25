@@ -113,16 +113,23 @@ export function VehicleForm({ vehicle }: { vehicle?: Vehicle }) {
           <legend className="px-2 text-[11px] font-medium tracking-[.16em] uppercase" style={{ color: "var(--brand)" }}>
             Fiche technique
           </legend>
+          {/* Les champs marqués * sont ceux qui composent la fiche technique
+              affichée sur le site : sans eux, la case reste vide et l'annonce
+              paraît bâclée. La motorisation, elle, n'est plus affichée — elle
+              reste utile pour le référencement, jamais bloquante. */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Field label="Kilométrage" name="mileage" defaultValue={vehicle?.mileage} placeholder="86 000 km" />
-            <Field label="Boîte" name="gearbox" defaultValue={vehicle?.gearbox} placeholder="Automatique" />
-            <Field label="Carburant" name="fuel" defaultValue={vehicle?.fuel} placeholder="Diesel" />
-            <Field label="Motorisation" name="engine" defaultValue={vehicle?.engine} placeholder="2.8 D-4D" />
+            <Field label="Kilométrage" name="mileage" required defaultValue={vehicle?.mileage} placeholder="86 000 km" />
+            <Field label="Boîte" name="gearbox" required defaultValue={vehicle?.gearbox} placeholder="Automatique" />
+            <Field label="Carburant" name="fuel" required defaultValue={vehicle?.fuel} placeholder="Diesel" />
+            <Field label="Places" name="seats" type="number" required min={2} max={9} defaultValue={vehicle?.seats ?? 5} />
+            <Field label="Couleur" name="color" required defaultValue={vehicle?.color} placeholder="Noir métallisé" />
+            <Field label="Transmission" name="drivetrain" required defaultValue={vehicle?.drivetrain} placeholder="4×4 permanent" />
+            <Field label="Type de caisse" name="bodywork" required defaultValue={vehicle?.bodywork} placeholder="SUV 5 portes" />
             <Field label="Puissance" name="power" defaultValue={vehicle?.power} placeholder="177 ch" />
-            <Field label="Places" name="seats" type="number" min={2} max={9} defaultValue={vehicle?.seats ?? 5} />
-            <Field label="Couleur" name="color" defaultValue={vehicle?.color} placeholder="Noir métallisé" />
-            <Field label="Transmission" name="drivetrain" defaultValue={vehicle?.drivetrain} placeholder="4×4 permanent" />
-            <Field label="Type de caisse" name="bodywork" defaultValue={vehicle?.bodywork} placeholder="SUV 5 portes" />
+            <Field
+              label="Motorisation" name="engine" defaultValue={vehicle?.engine} placeholder="2.8 D-4D"
+              hint="Facultatif — n'apparaît plus sur le site, sert au référencement."
+            />
           </div>
         </fieldset>
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Silhouette } from "@/components/vehicle/VehicleVisual";
 import { Gallery } from "@/components/vehicle/Gallery";
+import { SpecGrid } from "@/components/vehicle/SpecGrid";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { VehicleGrid } from "@/components/seo/VehicleGrid";
 import { ArrowLeft, Phone, WhatsApp } from "@/components/ui/icons";
@@ -20,9 +21,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const v = await getVehicle(slug);
   if (!v) return {};
 
+  // Motorisation et puissance sont facultatives : sans elles, la phrase se
+  // referme proprement au lieu de garder un blanc ou une virgule en trop.
+  const moteur = [v.engine, v.power].map((s) => s?.trim()).filter(Boolean).join(" ");
+  // Le prix est annoncé quand il est connu : écrire « prix communiqué par
+  // téléphone » alors que la page affiche 18 500 000 FCFA fait perdre le clic.
+  const prix = v.price ? `Prix : ${formatPrice(v.price)}.` : "Prix communiqué par téléphone.";
+
   return meta({
     title: `${v.brand} ${v.model} ${v.year} — ${v.mileage} | Dakar`,
-    description: `${v.brand} ${v.model} ${v.year} d'occasion à Dakar : ${v.mileage}, boîte ${v.gearbox.toLowerCase()}, ${v.fuel.toLowerCase()}, ${v.engine} ${v.power}, ${v.seats} places. ${v.origin}, papiers en règle, essai avant achat. Prix communiqué par téléphone.`,
+    description:
+      `${v.brand} ${v.model} ${v.year} d'occasion à Dakar : ${v.mileage}, ` +
+      `boîte ${v.gearbox.toLowerCase()}, ${v.fuel.toLowerCase()}` +
+      `${moteur ? `, ${moteur}` : ""}, ${v.seats} places. ` +
+      `${v.origin}, papiers en règle, essai avant achat. ${prix}`,
     path: `/vehicules/${v.slug}`,
     keywords: [
       `${v.brand} ${v.model} Dakar`,
@@ -55,18 +67,6 @@ export default async function VehiclePage({ params }: { params: Promise<{ slug: 
     { name: v.model, path: `/vehicules/${v.slug}` },
   ];
 
-  const specs: [string, string][] = [
-    ["Année", String(v.year)],
-    ["Kilométrage", v.mileage],
-    ["Boîte", v.gearbox],
-    ["Carburant", v.fuel],
-    ["Motorisation", `${v.engine} · ${v.power}`],
-    ["Places", String(v.seats)],
-    ["Couleur", v.color],
-    ["Transmission", v.drivetrain],
-    ["Carrosserie", v.bodywork],
-  ];
-
   return (
     <article className="section" style={{ paddingTop: "calc(var(--nav) + 40px)" }}>
       <JsonLd data={graph(dealerLd(), breadcrumbLd(trail), vehicleLd(v))} />
@@ -95,8 +95,13 @@ export default async function VehiclePage({ params }: { params: Promise<{ slug: 
             <h1 className="h2 mt-4">
               {v.brand} {v.model}
             </h1>
+            {/* Deux repères, pas trois. « Importé d'Europe » juste sous
+                « Disponible au showroom de Dakar » brouillait le message : le
+                visiteur veut d'abord savoir l'âge et l'usure. La provenance
+                reste renseignée dans le back-office et sert la description de
+                la page pour les recherches du type « 4×4 importé Dakar ». */}
             <p className="lead mt-3">
-              {v.year} · {v.mileage} · {v.origin}
+              {v.year} · {v.mileage}
             </p>
 
             {/* le prix est la première chose que l'on cherche : il passe avant la fiche technique */}
@@ -122,17 +127,7 @@ export default async function VehiclePage({ params }: { params: Promise<{ slug: 
             <h2 className="text-[12px] tracking-[.16em] uppercase font-medium mt-8 mb-3.5" style={{ color: "var(--brand)" }}>
               Fiche technique
             </h2>
-            <dl
-              className="grid grid-cols-2 sm:grid-cols-3 gap-px rounded-[var(--r2)] overflow-hidden border m-0"
-              style={{ background: "var(--line)", borderColor: "var(--line)" }}
-            >
-              {specs.map(([k, val]) => (
-                <div key={k} className="p-3.5" style={{ background: "var(--surf)" }}>
-                  <dt className="block text-[9.5px] tracking-[.15em] uppercase" style={{ color: "var(--ink-3)" }}>{k}</dt>
-                  <dd className="block mt-1.5 text-[14px] font-medium m-0">{val}</dd>
-                </div>
-              ))}
-            </dl>
+            <SpecGrid vehicle={v} />
 
             <div className="grid grid-cols-2 gap-2.5 mt-6">
               <a href={`tel:${site.phone}`} className="btn btn--primary"><Phone /> Appeler</a>

@@ -125,6 +125,38 @@ export async function saveVehicle(_prev: FormState, formData: FormData): Promise
   const price = Number(String(formData.get("price") ?? "").replace(/\D/g, ""));
   if (price > 0) vehicle.price = price;
 
+  /**
+   * Champs obligatoires — vérifiés ici, pas seulement dans le navigateur.
+   *
+   * L'attribut `required` d'un formulaire ne protège rien : il suffit de le
+   * retirer depuis les outils du navigateur, et une action serveur est de toute
+   * façon une URL qu'on peut appeler directement. Ce sont exactement les cases
+   * de la fiche technique affichée sur le site : les laisser vides produit une
+   * annonce à trous.
+   *
+   * La motorisation et la puissance n'y figurent pas : la première n'est plus
+   * affichée, la seconde disparaît proprement de la grille si elle manque.
+   */
+  const OBLIGATOIRES: [keyof Vehicle, string][] = [
+    ["mileage", "le kilométrage"],
+    ["gearbox", "la boîte"],
+    ["fuel", "le carburant"],
+    ["color", "la couleur"],
+    ["drivetrain", "la transmission"],
+    ["bodywork", "le type de caisse"],
+  ];
+  const manquants = OBLIGATOIRES.filter(([champ]) => !String(vehicle[champ] ?? "").trim()).map(([, nom]) => nom);
+  if (manquants.length) {
+    const liste =
+      manquants.length === 1
+        ? manquants[0]
+        : `${manquants.slice(0, -1).join(", ")} et ${manquants[manquants.length - 1]}`;
+    return { error: `Il manque ${liste}. Ces informations apparaissent sur la fiche du véhicule.` };
+  }
+  if (!Number.isInteger(vehicle.seats) || vehicle.seats < 2 || vehicle.seats > 9) {
+    return { error: "Le nombre de places doit être compris entre 2 et 9." };
+  }
+
   if (!vehicle.swatches.length) vehicle.swatches = ["#8AD6FF", "#C8D3DE", "#1F2A36", "#7E6A55"];
   if (!vehicle.photos?.length) delete vehicle.photos;
 

@@ -122,7 +122,16 @@ export function vehicleLd(v: Vehicle) {
     fuelType: v.fuel,
     driveWheelConfiguration: v.drivetrain,
     vehicleSeatingCapacity: v.seats,
-    vehicleEngine: { "@type": "EngineSpecification", name: `${v.engine} · ${v.power}` },
+    // Motorisation et puissance sont facultatives : on n'émet la propriété que
+    // si l'on a quelque chose à y mettre, plutôt qu'un « · » orphelin.
+    ...(v.engine?.trim() || v.power?.trim()
+      ? {
+          vehicleEngine: {
+            "@type": "EngineSpecification",
+            name: [v.engine, v.power].map((s) => s?.trim()).filter(Boolean).join(" · "),
+          },
+        }
+      : {}),
     itemCondition: "https://schema.org/UsedCondition",
     ...(km ? { mileageFromOdometer: { "@type": "QuantitativeValue", value: km, unitCode: "KMT" } } : {}),
     ...(v.photos?.length ? { image: v.photos.map((p) => `${site.url}${p}`) } : {}),

@@ -390,6 +390,35 @@ export const bodiesOf = (list: Vehicle[]) =>
     }))
     .filter((b) => b.count > 0);
 
+/**
+ * La fiche technique affichée sur le site, dans l'ordre de lecture.
+ *
+ * Vit ici, avec le type `Vehicle`, pour que la fiche complète et l'aperçu
+ * rapide ne puissent plus diverger — ils tenaient chacun leur copie de la
+ * liste, et une correction demandée par BMA n'était arrivée que sur l'une.
+ *
+ * Deux absences volontaires :
+ *  · la motorisation — « 3.0 SDV6 » ne parle qu'aux mécaniciens, et la valeur
+ *    complète débordait sur deux lignes. Elle reste saisie au back-office et
+ *    sert la description de la page pour les moteurs de recherche.
+ *  · les cases vides — un champ facultatif laissé de côté disparaît au lieu
+ *    d'afficher un libellé suivi de rien.
+ */
+export const vehicleSpecs = (v: Vehicle): [string, string][] =>
+  (
+    [
+      ["Année", String(v.year)],
+      ["Kilométrage", v.mileage],
+      ["Boîte", v.gearbox],
+      ["Carburant", v.fuel],
+      ["Puissance", v.power],
+      ["Places", String(v.seats)],
+      ["Couleur", v.color],
+      ["Transmission", v.drivetrain],
+      ["Carrosserie", v.bodywork],
+    ] as [string, string][]
+  ).filter(([, val]) => val?.trim());
+
 /** « 28 500 000 FCFA » — espaces insécables fines, comme en typographie française */
 export const formatPrice = (xof: number) =>
   `${new Intl.NumberFormat("fr-FR").format(xof).replace(/\u202f|\u00a0/g, " ")} FCFA`;

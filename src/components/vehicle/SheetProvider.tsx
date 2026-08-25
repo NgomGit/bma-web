@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Silhouette } from "./VehicleVisual";
+import { SpecGrid } from "./SpecGrid";
 import { Arrow, Close, Phone, WhatsApp } from "@/components/ui/icons";
 import { site, waVehicle } from "@/lib/site";
 import { formatPrice, type Vehicle } from "@/data/vehicles";
@@ -55,19 +56,6 @@ export function VehicleSheetProvider({ children }: { children: ReactNode }) {
     };
   }, [vehicle, close]);
 
-  const specs = vehicle
-    ? ([
-        ["Année", String(vehicle.year)],
-        ["Kilométrage", vehicle.mileage],
-        ["Boîte", vehicle.gearbox],
-        ["Carburant", vehicle.fuel],
-        ["Motorisation", `${vehicle.engine} · ${vehicle.power}`],
-        ["Places", String(vehicle.seats)],
-        ["Couleur", vehicle.color],
-        ["Transmission", vehicle.drivetrain],
-        ["Carrosserie", vehicle.bodywork],
-      ] as const)
-    : [];
 
   return (
     <SheetCtx.Provider value={ctx}>
@@ -187,9 +175,11 @@ export function VehicleSheetProvider({ children }: { children: ReactNode }) {
                   <h2 className="h2 mt-3.5" style={{ fontSize: "clamp(24px,4vw,38px)" }}>
                     {vehicle.model}
                   </h2>
-                  <p className="lead mt-2.5">
-                    {vehicle.brand} · {vehicle.origin}
-                  </p>
+                  {/* Même règle que sur la fiche : pas de provenance sous
+                      « Disponible au showroom ». Et pas d'année ni de
+                      kilométrage non plus — ils sont juste en dessous, dans la
+                      grille. Il ne reste que la marque, qui manque au titre. */}
+                  <p className="lead mt-2.5">{vehicle.brand}</p>
 
                   {/* le prix d'abord, la fiche technique ensuite */}
                   <div
@@ -208,19 +198,7 @@ export function VehicleSheetProvider({ children }: { children: ReactNode }) {
                     )}
                   </div>
 
-                  <div
-                    className="grid grid-cols-2 sm:grid-cols-3 gap-px rounded-[var(--r2)] overflow-hidden border mb-6"
-                    style={{ background: "var(--line)", borderColor: "var(--line)" }}
-                  >
-                    {specs.map(([k, val]) => (
-                      <div key={k} className="p-3.5" style={{ background: "var(--surf)" }}>
-                        <span className="block text-[9.5px] tracking-[.15em] uppercase" style={{ color: "var(--ink-3)" }}>
-                          {k}
-                        </span>
-                        <b className="block mt-1.5 text-[14px] font-medium">{val}</b>
-                      </div>
-                    ))}
-                  </div>
+                  <SpecGrid vehicle={vehicle} className="mb-6" />
 
                   {/* La navigation est côté client : sans ce `close`, le panneau
                       resterait ouvert par-dessus la fiche qui vient de s'afficher. */}

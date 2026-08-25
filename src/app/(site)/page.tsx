@@ -12,7 +12,7 @@ import { getVehicles } from "@/lib/store";
 export const metadata: Metadata = meta({
   title: "BMA — Concessionnaire automobile à Dakar",
   description:
-    "Baye Mor Automobile (BMA), concessionnaire à Dakar : SUV, 4×4, pick-up et berlines d'occasion vérifiés. Papiers en règle, essai avant achat, import sur commande depuis le Japon, Dubaï et l'Europe. Prix communiqué sur demande.",
+    "Baye Mor Automobile (BMA), concessionnaire à Dakar : SUV, 4×4, pick-up et berlines d'occasion vérifiés. Prix affichés, papiers en règle, essai avant achat, import sur commande depuis le Japon, Dubaï et l'Europe.",
   path: "/",
   keywords: [
     "concessionnaire Dakar",

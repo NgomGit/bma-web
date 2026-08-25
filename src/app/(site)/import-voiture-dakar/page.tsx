@@ -29,6 +29,8 @@ export const metadata: Metadata = meta({
   ],
 });
 
+/** Conservé pour la réactivation du bloc ci-dessous. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const STEPS = [
   { n: 1, t: "Vous décrivez le véhicule", d: "Marque, modèle, année, boîte, motorisation et budget. Un appel ou un message WhatsApp suffit — nous vous disons immédiatement si la recherche est réaliste dans votre enveloppe." },
   { n: 2, t: "Nous cherchons à l'étranger", d: "Nos correspondants au Japon, à Dubaï et en Europe identifient les véhicules correspondants. Vous recevez photos, kilométrage réel, historique d'entretien et rapport d'inspection avant tout engagement." },
@@ -101,6 +103,10 @@ export default function ImportPage() {
           compris. Un seul interlocuteur du premier appel à la remise des clés.
         </p>
 
+        {/* Parcours d'import en quatre étapes — mis de côté à la demande de BMA.
+            Pour le remettre : décommenter ce bloc. La constante STEPS reste en
+            place au-dessus.
+
         <h2 className="text-[24px] tracking-[-.035em] mb-6">Comment se déroule une commande</h2>
         <ol className="grid gap-3.5 lg:grid-cols-2 list-none p-0 m-0 mb-12">
           {STEPS.map((s) => (
@@ -116,6 +122,7 @@ export default function ImportPage() {
             </li>
           ))}
         </ol>
+        */}
 
         {/* Questions fréquentes — mises de côté à la demande de BMA.
             Pour les remettre : décommenter ce bloc ET `faqLd(FAQ)` dans le JsonLd

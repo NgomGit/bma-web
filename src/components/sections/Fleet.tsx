@@ -31,8 +31,8 @@ export function Fleet({ vehicles }: { vehicles: Vehicle[] }) {
           <span className="kicker">02 — Le parc</span>
           <h2 className="h2 mt-4">Tous les véhicules</h2>
           <p className="lead mt-3.5">
-            Les prix ne sont pas affichés : chaque tarif dépend de l&apos;état réel du véhicule et de votre mode de
-            paiement. Un appel suffit pour l&apos;obtenir, sans engagement.
+            Chaque véhicule est contrôlé avant sa mise en vente et vendu avec un dossier complet à votre nom.
+            Les prix affichés se discutent de vive voix selon votre mode de paiement.
           </p>
         </Reveal>
 

@@ -24,6 +24,18 @@ export function Gallery({ photos, alt }: { photos: string[]; alt: string }) {
   const [zoom, setZoom] = useState(false);
   const strip = useRef<HTMLDivElement>(null);
 
+  /**
+   * Ratio réel de chaque photo, mesuré au chargement.
+   *
+   * Sans lui, impossible d'arrondir les angles de l'image : avec
+   * `object-contain`, le cadre de l'élément occupe toute la scène et la photo
+   * y flotte au milieu — un `border-radius` arrondirait le cadre, pas la
+   * photo. On donne donc au conteneur le ratio exact du fichier, ce qui le
+   * fait coïncider au pixel près avec l'image affichée.
+   */
+  const [ratios, setRatios] = useState<Record<string, number>>({});
+  const ratio = ratios[photos[i]] ?? 16 / 10;
+
   const go = (n: number) => {
     const next = (n + photos.length) % photos.length;
     setI(next);
@@ -68,14 +80,32 @@ export function Gallery({ photos, alt }: { photos: string[]; alt: string }) {
               sizes="10vw"
               className="object-cover scale-110 blur-2xl opacity-35 z-[1]"
             />
-            <Image
-              src={photos[i]}
-              alt={i === 0 ? alt : `${alt} — photo ${i + 1}`}
-              fill
-              sizes="(max-width: 1024px) 100vw, 58vw"
-              priority={i === 0}
-              className="object-contain z-[2] p-2 sm:p-3"
-            />
+            <div className="absolute inset-0 z-[2] grid place-items-center p-2 sm:p-3">
+              {/* Dimensions intrinsèques plutôt que `fill` : contrainte par
+                  max-w/max-h, l'image se réduit en gardant son ratio, et le
+                  cadre de l'élément coïncide exactement avec la photo — c'est
+                  ce qui permet d'arrondir les angles de la photo elle-même,
+                  sans jamais la rogner, portrait comme paysage.
+                  min-h-0 / min-w-0 : un élément de grille a `min-height: auto`,
+                  qui l'empêcherait de descendre sous sa taille intrinsèque —
+                  la photo portrait déborderait de la scène au lieu de s'y
+                  réduire. */}
+              <Image
+                src={photos[i]}
+                alt={i === 0 ? alt : `${alt} — photo ${i + 1}`}
+                width={1200}
+                height={Math.round(1200 / ratio)}
+                sizes="(max-width: 1024px) 100vw, 58vw"
+                priority={i === 0}
+                className="max-w-full max-h-full min-w-0 min-h-0 w-auto h-auto object-contain rounded-[var(--r2)]"
+                onLoad={(e) => {
+                  const img = e.currentTarget;
+                  if (!img.naturalWidth) return;
+                  const r = img.naturalWidth / img.naturalHeight;
+                  setRatios((prev) => (prev[photos[i]] === r ? prev : { ...prev, [photos[i]]: r }));
+                }}
+              />
+            </div>
           </motion.div>
         </AnimatePresence>
 

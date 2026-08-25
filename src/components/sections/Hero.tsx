@@ -79,7 +79,7 @@ export function Hero({ vehicles }: { vehicles: Vehicle[] }) {
               transition={{ delay: 0.42, duration: 0.9 }}
             >
               Un parc vérifié pièce par pièce, des papiers en règle, et la possibilité de commander depuis
-              l&apos;étranger le modèle exact que vous cherchez. Le prix se discute de vive voix — comme il se doit.
+              l&apos;étranger le modèle exact que vous cherchez. Les prix sont annoncés, et se discutent de vive voix.
             </motion.p>
             <motion.div
               className="mt-7 flex flex-wrap gap-3"
@@ -120,7 +120,11 @@ export function Hero({ vehicles }: { vehicles: Vehicle[] }) {
                 {v.brand.split("-")[0].toUpperCase()}
               </span>
 
-              <div className="relative z-[2] aspect-[16/8] grid place-items-center">
+              {/* aspect 16/10 = celui des photos de couverture : `object-cover`
+                  ne rogne donc rien, et l'arrondi porte sur la photo elle-même
+                  — impossible avec `object-contain`, où le cadre de l'élément
+                  est plus grand que l'image affichée. */}
+              <div className="relative z-[2] aspect-[16/10] grid place-items-center">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={v.slug}
@@ -137,7 +141,7 @@ export function Hero({ vehicles }: { vehicles: Vehicle[] }) {
                         fill
                         sizes="(max-width: 1024px) 92vw, 640px"
                         priority
-                        className="object-contain"
+                        className="object-cover rounded-[var(--r2)]"
                       />
                     ) : (
                       <Silhouette body={v.body} className="w-full" />

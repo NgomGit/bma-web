@@ -87,7 +87,7 @@ export function Selection({ vehicles }: { vehicles: Vehicle[] }) {
                   0{i + 1} / 0{featured.length}
                 </span>
                 <span className="relative z-[2] w-full transition-transform duration-700 group-hover/stage:translate-x-2.5 group-hover/stage:scale-[1.05]">
-                  <VehicleVisual vehicle={v} priority={i === 0} />
+                  <VehicleVisual vehicle={v} priority={i === 0} className="rounded-[var(--r2)]" />
                 </span>
               </div>
               <div className="p-5">

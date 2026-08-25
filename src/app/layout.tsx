@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: `%s — ${site.name} Automobile`,
   },
   description:
-    "BMA — Baye Mor Automobile, concessionnaire à Dakar. Véhicules vérifiés, papiers en règle, essai avant achat et import sur commande depuis l'étranger. Prix communiqué sur demande.",
+    "BMA — Baye Mor Automobile, concessionnaire à Dakar. Véhicules vérifiés à prix affiché, papiers en règle, essai avant achat et import sur commande depuis l'étranger.",
   keywords: ["concessionnaire Dakar", "voiture Sénégal", "import véhicule Dakar", "SUV Dakar", "Baye Mor Automobile"],
   openGraph: {
     type: "website",

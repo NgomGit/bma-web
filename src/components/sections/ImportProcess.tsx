@@ -1,10 +1,9 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { Reveal } from "@/components/ui/Reveal";
 import { Phone, WhatsApp } from "@/components/ui/icons";
 import { site, waImport } from "@/lib/site";
 
+/** Conservé pour la réactivation du bloc ci-dessous. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const STEPS = [
   { n: 1, t: "Vous décrivez", d: "Marque, modèle, année, boîte, budget. Un appel ou un message WhatsApp suffit." },
   { n: 2, t: "Nous cherchons", d: "Vous recevez les véhicules trouvés avec photos, kilométrage réel et historique complet." },
@@ -29,6 +28,10 @@ export function ImportProcess() {
             puis gérons transport, dédouanement et immatriculation jusqu&apos;à Dakar.
           </p>
         </Reveal>
+
+        {/* Les quatre étapes du parcours d'import — mises de côté à la demande
+            de BMA. Pour les remettre : décommenter ce bloc. La constante STEPS
+            juste au-dessus est conservée telle quelle.
 
         <div className="relative grid gap-3.5 lg:grid-cols-4 lg:gap-4.5">
           <div className="hidden lg:block absolute left-[6%] right-[6%] top-[38px] h-px" style={{ background: "var(--line)" }} />
@@ -61,6 +64,7 @@ export function ImportProcess() {
             </motion.article>
           ))}
         </div>
+        */}
 
         <Reveal className="mt-8 flex flex-wrap gap-3">
           <a href={waImport()} target="_blank" rel="noopener" className="btn btn--wa">

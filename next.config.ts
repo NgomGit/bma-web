@@ -1,5 +1,12 @@
 import type { NextConfig } from "next";
 
+/**
+ * Hôte du projet Supabase, d'où sont servies les photos des véhicules.
+ * Déclaré ici pour le jour où l'optimisation d'images sera réactivée : sans
+ * cette autorisation, `next/image` refuse toute source distante.
+ */
+const supabaseHost = process.env.SUPABASE_URL ? new URL(process.env.SUPABASE_URL).host : null;
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   /**
@@ -17,7 +24,12 @@ const nextConfig: NextConfig = {
    * plus grand-chose à gagner, et le site ne dépend plus d'un service facturé
    * au compteur, quel que soit l'hébergeur.
    */
-  images: { unoptimized: true },
+  images: {
+    unoptimized: true,
+    remotePatterns: supabaseHost
+      ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/**" }]
+      : [],
+  },
 };
 
 export default nextConfig;

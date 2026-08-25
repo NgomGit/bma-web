@@ -30,16 +30,28 @@ export function LoginForm({ next }: { next: string }) {
         </span>
 
         <input type="hidden" name="suite" value={next} />
+        <div className="grid gap-3.5">
+        <label className="block">
+          <span className="block text-[11px] font-medium tracking-[.1em] uppercase mb-1.5" style={{ color: "var(--ink-3)" }}>
+            Email
+          </span>
+          <input
+            name="email" type="email" required autoFocus autoComplete="username" inputMode="email"
+            className="w-full rounded-[10px] border px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--brand)]"
+            style={{ background: "var(--surf-2)", borderColor: "var(--line-2)", color: "var(--ink)" }}
+          />
+        </label>
         <label className="block">
           <span className="block text-[11px] font-medium tracking-[.1em] uppercase mb-1.5" style={{ color: "var(--ink-3)" }}>
             Mot de passe
           </span>
           <input
-            name="password" type="password" required autoFocus autoComplete="current-password"
+            name="password" type="password" required autoComplete="current-password"
             className="w-full rounded-[10px] border px-3.5 py-2.5 text-[14px] outline-none focus:border-[var(--brand)]"
             style={{ background: "var(--surf-2)", borderColor: "var(--line-2)", color: "var(--ink)" }}
           />
         </label>
+        </div>
 
         {state.error && (
           <p className="text-[13px] rounded-[10px] px-3.5 py-2.5"

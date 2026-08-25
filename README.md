@@ -205,28 +205,63 @@ pas par un développeur.
 
 ### Accès
 
-Créer un fichier `.env.local` à la racine (modèle dans `.env.example`) :
+Chaque personne a son propre compte. Créer un fichier `.env.local` à la racine
+(modèle dans `.env.example`) :
 
 ```bash
-ADMIN_PASSWORD=votre-mot-de-passe
+SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
+SERVICE_ROLE_KEY=…            # Supabase → Settings → API → service_role
 AUTH_SECRET=$(openssl rand -hex 32)
 ```
 
-Puis se rendre sur `/admin`. Un seul mot de passe, pas de compte à créer.
-La session dure 7 jours dans un cookie `httpOnly` signé en HMAC-SHA256.
+Puis se rendre sur `/admin` et entrer email + mot de passe. La session dure
+7 jours dans un cookie `httpOnly` signé en HMAC-SHA256.
 
-⚠️ **Changez `ADMIN_PASSWORD` avant la mise en ligne.** Sans `AUTH_SECRET`,
-la connexion est refusée — c'est volontaire.
+Le cookie ne contient que l'identifiant du compte et une date d'expiration : le
+**rôle est relu en base à chaque requête**. Désactiver quelqu'un le met dehors à
+la page suivante, sans attendre l'expiration du cookie.
+
+⚠️ Sans `AUTH_SECRET`, la connexion est refusée — c'est volontaire.
+`ADMIN_PASSWORD` n'existe plus : le mot de passe unique partagé a été remplacé
+par des comptes nominatifs.
+
+### Les deux rôles
+
+| | Superadmin | Assistant |
+|---|---|---|
+| Ajouter, modifier, supprimer un véhicule | ✅ | ✅ |
+| Téléverser et retirer des photos | ✅ | ✅ |
+| Changer l'ordre du parc, mettre en avant | ✅ | ✅ |
+| Créer, désactiver, supprimer des comptes | ✅ | ❌ |
+| Réinitialiser le mot de passe d'autrui | ✅ | ❌ |
+| Changer son propre mot de passe | ✅ | ✅ |
+
+`/admin/utilisateurs` est réservé au superadmin. L'onglet n'apparaît pas pour un
+assistant, et la page comme les actions vérifient le rôle côté serveur — masquer
+un lien n'a jamais protégé quoi que ce soit.
+
+**Désactiver plutôt que supprimer.** Un compte désactivé ne peut plus entrer mais
+reste dans la liste, et se réactive d'un clic. La base refuse par ailleurs de
+laisser le parc sans aucun superadmin actif : impossible de se verrouiller dehors.
+
+**Mots de passe.** Hachés en scrypt (`node:crypto`), jamais stockés en clair.
+Un mot de passe oublié ne se retrouve pas : le superadmin en génère un nouveau
+depuis la liste des comptes, il s'affiche une seule fois, à dicter au téléphone.
+Il ne transite pas par l'URL — il vit une minute dans un cookie `httpOnly`, pour
+ne pas finir dans l'historique du navigateur ni dans les journaux de l'hébergeur.
 
 ### Ce qu'il permet
 
 | Action | Où |
 |---|---|
-| Voir l'état du parc (disponibles, sur commande, mis en avant, sans photo) | `/admin` |
+| Voir l'état du parc (mis en avant, sans photo) | `/admin` |
 | Ajouter, modifier, dupliquer, supprimer un véhicule | `/admin/vehicules/…` |
 | Téléverser des photos (JPG, PNG, WebP, AVIF — 8 Mo max) | bloc « Photos » de la fiche |
+| Retirer une photo (le fichier part aussi du stockage) | croix au survol de la vignette |
 | Mettre un véhicule en avant (carrousel d'accueil + rail « Sélection ») | bouton sur la liste |
 | Changer l'ordre d'affichage sur le site | glisser-déposer d'une ligne par sa poignée ⠿ |
+| Gérer les comptes | `/admin/utilisateurs` (superadmin) |
+| Changer son mot de passe | `/admin/mon-compte` |
 
 L'ordre de la liste **est** l'ordre du site. On attrape une ligne par la poignée à
 gauche (le glissement ne part que de là, pour que la sélection de texte et le
@@ -240,25 +275,43 @@ véhicules et `sitemap.xml` — sans redéploiement.
 
 ### Où vivent les données
 
-Le contenu est dans **`data/vehicles.json`**, à la racine, hors du code. Le fichier
-est créé au premier démarrage à partir de `src/data/vehicles.ts` (le jeu de départ).
-Il est exclu de Git : c'est le contenu du concessionnaire, à sauvegarder, pas à versionner.
+Dans **Supabase** : une table `vehicles` pour le parc, une table `users` pour les
+accès, un seau Storage `vehicules` pour les photos. Le schéma complet, commenté,
+est dans **`supabase/schema.sql`** — à exécuter une fois dans Supabase → SQL Editor.
 
-> **Sauvegarde** : copier `data/vehicles.json` et le dossier `public/vehicules/`
-> suffit à tout restaurer.
+Les deux tables ont RLS activée **sans aucune policy**. Ce n'est pas un oubli :
+sans policy, PostgREST refuse tout aux clés publiques, tandis que la clé
+`service_role` contourne RLS. Or le site n'interroge la base que depuis le
+serveur Next, avec cette clé. La base est donc fermée depuis l'extérieur, même
+en connaissant l'URL du projet.
 
-### Contrainte d'hébergement à connaître
+> **Sauvegarde** : Supabase sauvegarde la base automatiquement. Le seau `vehicules`
+> se télécharge depuis l'interface Storage.
 
-Le back-office **écrit sur le disque** (le JSON et les photos). Il fonctionne donc sur :
+`src/lib/store.ts` reste le **seul** fichier qui sait où vivent les données. Ses six
+fonctions (`getVehicles`, `getVehicle`, `putVehicle`, `removeVehicle`, `setOrder`,
+`makeSlug`) sont l'unique interface : changer à nouveau de base ne toucherait que
+ce fichier, plus `uploadPhoto` / `removePhoto` dans `src/app/admin/actions.ts` pour
+les fichiers.
 
-- ✅ un VPS, Render, Railway, Dokku, Coolify, ou tout hébergement Node persistant
-- ❌ **pas** sur Vercel ou Netlify Functions — leur système de fichiers est en lecture seule
+### Reprise des données (une seule fois)
 
-Pour passer sur ces plateformes, il n'y a **qu'un seul fichier à réécrire** :
-`src/lib/store.ts`. Ses cinq fonctions (`getVehicles`, `getVehicle`, `putVehicle`,
-`removeVehicle`, `moveVehicle`) deviennent des requêtes vers Postgres, Supabase ou
-Turso, et les photos partent vers S3 / Cloudflare R2. Le reste de l'application ne
-connaît que cette interface et ne bouge pas.
+```bash
+# 1. Supabase → SQL Editor → coller supabase/schema.sql → Run
+# 2. puis, à la racine du projet :
+node scripts/migrate.mjs --email=vous@exemple.com --nom="Votre Nom"
+```
+
+Le script crée le seau, y envoie les photos de `public/vehicules/`, transfère
+`data/vehicles.json` vers la table, crée le compte superadmin et affiche son mot
+de passe. Il est ré-exécutable sans risque.
+
+### Hébergement
+
+Le back-office fonctionne désormais **partout**, Vercel compris : plus rien n'est
+écrit sur le disque du serveur. C'était la limite précédente — le parc vivait dans
+un fichier JSON, que Vercel refuse d'écrire, et chaque enregistrement finissait sur
+une page d'erreur sans rien sauvegarder.
 
 ### Organisation des routes
 

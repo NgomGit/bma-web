@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { saveVehicle, uploadPhoto, type FormState } from "@/app/admin/actions";
+import { removePhoto, saveVehicle, uploadPhoto, type FormState } from "@/app/admin/actions";
 import { Silhouette } from "@/components/vehicle/VehicleVisual";
 import type { BodyType, Vehicle } from "@/data/vehicles";
 
@@ -214,9 +214,35 @@ function PhotoBox({ vehicle }: { vehicle: Vehicle }) {
 
       {vehicle.photos?.length ? (
         <div className="grid grid-cols-3 gap-2">
-          {vehicle.photos.map((p) => (
-            <span key={p} className="relative block aspect-square rounded-lg overflow-hidden border" style={{ borderColor: "var(--line)" }}>
+          {vehicle.photos.map((p, i) => (
+            <span key={p} className="relative block aspect-square rounded-lg overflow-hidden border group" style={{ borderColor: "var(--line)" }}>
               <Image src={p} alt="" fill sizes="100px" className="object-cover" />
+              {/* Retirer la photo efface aussi le fichier du seau Supabase.
+                  Sans ce bouton, la seule façon de la retirer était d'effacer
+                  sa ligne dans le champ « Photos » — le fichier, lui, restait
+                  stocké et facturé sans qu'aucune page n'y renvoie. */}
+              <form action={removePhoto} className="absolute top-1 right-1 z-[3]">
+                <input type="hidden" name="slug" value={vehicle.slug} />
+                <input type="hidden" name="photo" value={p} />
+                <button
+                  type="submit"
+                  aria-label={`Retirer la photo ${i + 1}`}
+                  title="Retirer cette photo"
+                  className="w-6 h-6 rounded-full grid place-items-center text-[13px] leading-none
+                             opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-200"
+                  style={{ background: "rgba(3,10,22,.72)", color: "#fff", border: "1px solid rgba(255,255,255,.28)" }}
+                >
+                  ×
+                </button>
+              </form>
+              {i === 0 && (
+                <span
+                  className="absolute left-1 bottom-1 z-[3] px-1.5 py-0.5 rounded text-[9px] tracking-[.08em] uppercase"
+                  style={{ background: "rgba(3,10,22,.72)", color: "#fff" }}
+                >
+                  Couverture
+                </span>
+              )}
             </span>
           ))}
         </div>

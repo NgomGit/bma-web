@@ -1,12 +1,12 @@
 "use server";
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { COOKIE, SESSION_MAX_AGE, createToken, isSignedIn, passwordMatches } from "@/lib/auth";
+import { COOKIE, SESSION_MAX_AGE, createToken, requireUser } from "@/lib/auth";
+import { authenticate, touchLastSeen } from "@/lib/users";
 import { getVehicle, makeSlug, putVehicle, removeVehicle, setOrder } from "@/lib/store";
+import { objectPathFromUrl, sbRemoveObject, sbUpload } from "@/lib/supabase";
 import type { BodyType, Vehicle } from "@/data/vehicles";
 
 export type FormState = { error?: string; ok?: string };
@@ -25,26 +25,40 @@ function refreshPublicPages(slug?: string) {
   if (slug) revalidatePath(`/vehicules/${slug}`);
 }
 
-async function requireSession() {
-  if (!(await isSignedIn())) redirect("/admin/login");
-}
+/** Toute action du parc est ouverte aux deux rôles : c'est le métier de l'assistante. */
+const requireSession = requireUser;
 
 /* ------------------------------------------------------------------ session */
 
 export async function signIn(_prev: FormState, formData: FormData): Promise<FormState> {
+  const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const next = String(formData.get("suite") ?? "/admin");
 
-  if (!process.env.ADMIN_PASSWORD || !process.env.AUTH_SECRET) {
-    return { error: "ADMIN_PASSWORD et AUTH_SECRET ne sont pas définis. Voir .env.example." };
-  }
-  if (!passwordMatches(password)) {
-    // léger délai : décourage les tentatives répétées
-    await new Promise((r) => setTimeout(r, 600));
-    return { error: "Mot de passe incorrect." };
+  if (!process.env.AUTH_SECRET) {
+    return { error: "AUTH_SECRET n'est pas défini. Voir .env.example." };
   }
 
-  (await cookies()).set(COOKIE, await createToken(), {
+  let result: Awaited<ReturnType<typeof authenticate>>;
+  try {
+    result = await authenticate(email, password);
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Connexion impossible." };
+  }
+
+  if (result && "disabled" in result) {
+    return { error: "Ce compte a été désactivé. Contactez l'administrateur." };
+  }
+  if (!result) {
+    // Léger délai : décourage les tentatives répétées, et empêche de mesurer
+    // au chronomètre si l'adresse existe.
+    await new Promise((r) => setTimeout(r, 600));
+    return { error: "Email ou mot de passe incorrect." };
+  }
+
+  await touchLastSeen(result.user.id);
+
+  (await cookies()).set(COOKIE, await createToken(result.user.id), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -116,9 +130,9 @@ export async function saveVehicle(_prev: FormState, formData: FormData): Promise
 
   /**
    * L'écriture peut échouer pour une raison qui n'est pas la faute de
-   * l'utilisateur : disque en lecture seule sur un hébergement serverless.
-   * Sans ce filet, l'action lève, Next renvoie un 500 et le concessionnaire
-   * ne voit qu'une page noire « A server error occurred » — impossible à
+   * l'utilisateur : base injoignable, variables d'environnement absentes.
+   * Sans ce filet, l'action lève, Next renvoie un 500 et le concessionnaire ne
+   * voit qu'une page noire « A server error occurred » — impossible à
    * interpréter. On rend le message tel quel dans le formulaire.
    */
   try {
@@ -134,7 +148,16 @@ export async function saveVehicle(_prev: FormState, formData: FormData): Promise
 export async function deleteVehicle(formData: FormData) {
   await requireSession();
   const slug = String(formData.get("slug") ?? "");
+
+  // On récupère les photos AVANT de supprimer la ligne : après, plus personne
+  // ne saurait quels fichiers du seau sont devenus orphelins.
+  const v = await getVehicle(slug);
   await removeVehicle(slug);
+  for (const photo of v?.photos ?? []) {
+    const object = objectPathFromUrl(photo);
+    if (object) await sbRemoveObject(object);
+  }
+
   refreshPublicPages(slug);
   redirect("/admin?supprime=1");
 }
@@ -189,9 +212,12 @@ const ALLOWED = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"])
 const MAX_BYTES = 8 * 1024 * 1024;
 
 /**
- * Enregistre une photo dans /public/vehicules/<slug>/ et renvoie son chemin.
- * ⚠️ Comme le store JSON, l'upload écrit sur le disque : hébergement Node
- * persistant requis. Sur serverless, brancher un service d'objets (S3, R2…).
+ * Enregistre une photo dans le seau Supabase Storage et renvoie son URL.
+ *
+ * Auparavant le fichier était écrit dans /public/vehicules/<slug>/ : sur
+ * Vercel, ce dossier est en lecture seule et l'envoi échouait systématiquement.
+ * Storage accepte l'écriture depuis n'importe quel hébergeur, sert les photos
+ * derrière son propre CDN, et ne perd rien au déploiement suivant.
  */
 export async function uploadPhoto(_prev: FormState, formData: FormData): Promise<FormState> {
   await requireSession();
@@ -203,27 +229,22 @@ export async function uploadPhoto(_prev: FormState, formData: FormData): Promise
   if (!ALLOWED.has(file.type)) return { error: "Format accepté : JPG, PNG, WebP ou AVIF." };
   if (file.size > MAX_BYTES) return { error: "Fichier trop lourd (8 Mo maximum)." };
 
-  const dir = path.join(process.cwd(), "public", "vehicules", slug);
   const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : file.type === "image/avif" ? "avif" : "jpg";
-  const name = `${Date.now().toString(36)}.${ext}`;
-  const publicPath = `/vehicules/${slug}/${name}`;
+  // Horodatage en base 36 + hasard : deux photos envoyées dans la même seconde
+  // depuis deux téléphones ne peuvent pas s'écraser l'une l'autre.
+  const name = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
 
+  let url: string;
   try {
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
+    url = await sbUpload(`${slug}/${name}`, await file.arrayBuffer(), file.type);
     const v = await getVehicle(slug);
-    if (v) await putVehicle({ ...v, photos: [...(v.photos ?? []), publicPath] });
-  } catch {
-    return {
-      error:
-        "Téléversement impossible : le système de fichiers est en lecture seule. " +
-        "C'est le cas sur Vercel et Netlify. Déployez sur un hébergement Node persistant " +
-        "(Render, Railway, VPS) pour que le back-office puisse écrire.",
-    };
+    if (v) await putVehicle({ ...v, photos: [...(v.photos ?? []), url] });
+  } catch (e) {
+    return { error: e instanceof Error ? `Téléversement impossible : ${e.message}` : "Téléversement impossible." };
   }
 
   refreshPublicPages(slug);
-  return { ok: publicPath };
+  return { ok: url };
 }
 
 export async function removePhoto(formData: FormData) {
@@ -233,6 +254,10 @@ export async function removePhoto(formData: FormData) {
   const v = await getVehicle(slug);
   if (v) {
     await putVehicle({ ...v, photos: (v.photos ?? []).filter((p) => p !== photo) });
+    // Le fichier part aussi du seau : sans ça, chaque photo remplacée resterait
+    // facturée au stockage sans qu'aucune page n'y renvoie.
+    const object = objectPathFromUrl(photo);
+    if (object) await sbRemoveObject(object);
     refreshPublicPages(slug);
   }
   redirect(`/admin/vehicules/${slug}`);

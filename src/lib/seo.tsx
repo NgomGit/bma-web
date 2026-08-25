@@ -12,6 +12,18 @@ import { site } from "./site";
 
 const DEALER_ID = `${site.url}/#concessionnaire`;
 
+/**
+ * Rend une adresse d'image absolue, qu'elle soit déjà complète ou non.
+ *
+ * Les photos ont changé de nature avec la bascule vers Supabase : c'étaient des
+ * chemins locaux (« /vehicules/bmw/01.jpg »), ce sont désormais des adresses
+ * complètes vers le stockage. Les préfixer aveuglément par le domaine du site
+ * produisait des monstres du genre « https://bma-automobile.snhttps://… », que
+ * Google rejette en silence — les données structurées se retrouvaient sans
+ * aucune image valide, et une fiche véhicule sans image ne remonte pas.
+ */
+const absolu = (src: string) => (/^https?:\/\//i.test(src) ? src : `${site.url}${src}`);
+
 export function meta({
   title,
   description,
@@ -59,7 +71,7 @@ export function dealerLd() {
     url: site.url,
     telephone: site.phone,
     hasMap: site.maps,
-    image: `${site.url}/icon.svg`,
+    image: absolu("/icon.svg"),
     description:
       "Concessionnaire automobile à Dakar. Véhicules d'occasion vérifiés, papiers en règle, essai avant achat et import sur commande depuis le Japon, Dubaï et l'Europe.",
     address: {
@@ -134,7 +146,7 @@ export function vehicleLd(v: Vehicle) {
       : {}),
     itemCondition: "https://schema.org/UsedCondition",
     ...(km ? { mileageFromOdometer: { "@type": "QuantitativeValue", value: km, unitCode: "KMT" } } : {}),
-    ...(v.photos?.length ? { image: v.photos.map((p) => `${site.url}${p}`) } : {}),
+    ...(v.photos?.length ? { image: v.photos.map(absolu) } : {}),
     offers: {
       "@type": "Offer",
       "@id": `${site.url}/vehicules/${v.slug}#offre`,

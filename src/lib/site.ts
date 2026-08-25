@@ -2,11 +2,29 @@
  * Configuration de la maison.
  * ⚠️ À REMPLACER avant mise en ligne : téléphone, adresse, coordonnées GPS.
  */
+/**
+ * Adresse officielle du site.
+ *
+ * Elle sert de racine à TOUT le référencement : l'adresse canonique de chaque
+ * page, le plan du site, les données structurées, les images de partage
+ * WhatsApp. Si elle désigne un domaine qui ne répond pas, Google reçoit sur
+ * chaque page l'instruction « la vraie version est là-bas » et n'indexe rien —
+ * le site est en ligne mais introuvable.
+ *
+ * Elle est donc réglée par variable d'environnement, pas en dur : le jour où le
+ * domaine définitif est acheté, il suffit de renseigner NEXT_PUBLIC_SITE_URL
+ * sur Vercel et de redéployer. Aucune ligne de code à toucher.
+ *
+ * Le préfixe NEXT_PUBLIC_ est nécessaire : `site` est aussi lu par des
+ * composants qui s'exécutent dans le navigateur.
+ */
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.bayemorautomobile.com").replace(/\/+$/, "");
+
 export const site = {
   name: "BMA",
   legalName: "Baye Mor Automobile",
   tagline: "Concessionnaire à Dakar",
-  url: "https://bma-automobile.sn",
+  url: SITE_URL,
 
   // repris de la fiche Google Business vérifiée de l'établissement
   phone: "+221710748281",
